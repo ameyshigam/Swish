@@ -2,7 +2,18 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { createPost, getPosts, getUserPosts, getExplorePosts, toggleLike, addComment, deletePost } = require('../controllers/postController');
+const {
+    createPost,
+    getPosts,
+    getUserPosts,
+    getExplorePosts,
+    toggleLike,
+    addComment,
+    deletePost,
+    getPostById,
+    toggleBookmark,
+    getBookmarkedPosts
+} = require('../controllers/postController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 // Multer Config
@@ -35,12 +46,19 @@ function checkFileType(file, cb) {
     }
 }
 
+// Static routes first
 router.post('/', protect, upload.single('image'), createPost);
 router.get('/', protect, getPosts);
-router.get('/explore', protect, getExplorePosts); // Must be before /me if me was :id, but here it's fine.
+router.get('/explore', protect, getExplorePosts);
 router.get('/me', protect, getUserPosts);
+router.get('/bookmarks', protect, getBookmarkedPosts);
+
+// Dynamic routes after
+router.get('/:id', protect, getPostById);
 router.put('/:id/like', protect, toggleLike);
+router.put('/:id/bookmark', protect, toggleBookmark);
 router.post('/:id/comment', protect, addComment);
 router.delete('/:id', protect, adminOnly, deletePost);
 
 module.exports = router;
+

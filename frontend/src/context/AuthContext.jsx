@@ -12,20 +12,28 @@ export const AuthProvider = ({ children }) => {
     // Configure axios base URL
     axios.defaults.baseURL = 'http://localhost:5001/api';
 
+    const fetchUser = async () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                const res = await axios.get('/auth/me');
+                setUser(res.data);
+                return res.data;
+            } catch (error) {
+                console.error("Auth Check Failed", error);
+                localStorage.removeItem('token');
+                delete axios.defaults.headers.common['Authorization'];
+                setUser(null);
+                return null;
+            }
+        }
+        return null;
+    };
+
     useEffect(() => {
         const checkLoggedIn = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                    const res = await axios.get('/auth/me');
-                    setUser(res.data);
-                } catch (error) {
-                    console.error("Auth Check Failed", error);
-                    localStorage.removeItem('token');
-                    delete axios.defaults.headers.common['Authorization'];
-                }
-            }
+            await fetchUser();
             setLoading(false);
         };
 
@@ -54,9 +62,14 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
     };
 
+    const refreshUser = async () => {
+        return await fetchUser();
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
             {!loading && children}
         </AuthContext.Provider>
     );
 };
+

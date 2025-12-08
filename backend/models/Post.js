@@ -42,6 +42,38 @@ class Post {
         ]).toArray();
     }
 
+    static async findAllPaginated(skip = 0, limit = 10) {
+        return await this.collection().aggregate([
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'authorId',
+                    foreignField: '_id',
+                    as: 'author'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$author',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    'author.password': 0,
+                    'author.email': 0
+                }
+            }
+        ]).toArray();
+    }
+
+    static async getCount() {
+        return await this.collection().countDocuments();
+    }
+
     static async findByAuthor(authorId) {
         return await this.collection().aggregate([
             {

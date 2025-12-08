@@ -1,4 +1,6 @@
 const Post = require('../models/Post');
+const User = require('../models/User');
+const Notification = require('../models/Notification');
 const { ObjectId } = require('mongodb');
 
 const createPost = async (req, res) => {
@@ -9,9 +11,17 @@ const createPost = async (req, res) => {
             return res.status(400).json({ message: 'Please upload an image' });
         }
 
+        if (!caption || caption.trim().length === 0) {
+            return res.status(400).json({ message: 'Caption is required' });
+        }
+
+        if (caption.length > 500) {
+            return res.status(400).json({ message: 'Caption must be less than 500 characters' });
+        }
+
         const newPost = {
             authorId: new ObjectId(req.user.id),
-            caption,
+            caption: caption.trim(),
             imageUrl: `/uploads/${req.file.filename}`,
             likes: [],
             comments: []
@@ -27,8 +37,23 @@ const createPost = async (req, res) => {
 
 const getPosts = async (req, res) => {
     try {
-        const posts = await Post.findAll();
-        res.json(posts);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const posts = await Post.findAllPaginated(skip, limit);
+        const total = await Post.getCount();
+
+        res.json({
+            posts,
+            pagination: {
+                page,
+                limit,
+                total,
+                pages: Math.ceil(total / limit),
+                hasMore: skip + posts.length < total
+            }
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
@@ -57,7 +82,21 @@ const getExplorePosts = async (req, res) => {
 
 const toggleLike = async (req, res) => {
     try {
-        const result = await Post.like(req.params.id, req.user.id);
+        const postId = req.params.id;
+        const result = await Post.like(postId, req.user.id);
+
+        // Send notification if liked (not unliked)
+        if (result.liked) {
+            const post = await Post.collection().findOne({ _id: new ObjectId(postId) });
+            if (post && post.authorId.toString() !== req.user.id) {
+                await Notification.createLikeNotification(
+                    req.user.id,
+                    post.authorId.toString(),
+                    postId
+                );
+            }
+        }
+
         res.json(result);
     } catch (error) {
         console.error(error);
@@ -67,8 +106,30 @@ const toggleLike = async (req, res) => {
 
 const addComment = async (req, res) => {
     try {
+        const postId = req.params.id;
         const { text } = req.body;
-        const comment = await Post.addComment(req.params.id, req.user.id, text, req.user.username);
+
+        if (!text || text.trim().length === 0) {
+            return res.status(400).json({ message: 'Comment text is required' });
+        }
+
+        if (text.length > 280) {
+            return res.status(400).json({ message: 'Comment must be less than 280 characters' });
+        }
+
+        const comment = await Post.addComment(postId, req.user.id, text.trim(), req.user.username);
+
+        // Send notification to post author
+        const post = await Post.collection().findOne({ _id: new ObjectId(postId) });
+        if (post && post.authorId.toString() !== req.user.id) {
+            await Notification.createCommentNotification(
+                req.user.id,
+                post.authorId.toString(),
+                postId,
+                text
+            );
+        }
+
         res.json(comment);
     } catch (error) {
         console.error(error);
@@ -86,4 +147,105 @@ const deletePost = async (req, res) => {
     }
 };
 
-module.exports = { createPost, getPosts, getUserPosts, getExplorePosts, toggleLike, addComment, deletePost };
+const getPostById = async (req, res) => {
+    try {
+        const post = await Post.collection().aggregate([
+            { $match: { _id: new ObjectId(req.params.id) } },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'authorId',
+                    foreignField: '_id',
+                    as: 'author'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$author',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    'author.password': 0,
+                    'author.email': 0
+                }
+            }
+        ]).toArray();
+
+        if (!post || post.length === 0) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        res.json(post[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+// Bookmark a post
+const toggleBookmark = async (req, res) => {
+    try {
+        const postId = req.params.id;
+        const result = await User.toggleBookmark(req.user.id, postId);
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+// Get user's bookmarked posts
+const getBookmarkedPosts = async (req, res) => {
+    try {
+        const bookmarks = await User.getBookmarks(req.user.id);
+
+        if (bookmarks.length === 0) {
+            return res.json([]);
+        }
+
+        const posts = await Post.collection().aggregate([
+            { $match: { _id: { $in: bookmarks } } },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'authorId',
+                    foreignField: '_id',
+                    as: 'author'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$author',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    'author.password': 0,
+                    'author.email': 0
+                }
+            },
+            { $sort: { createdAt: -1 } }
+        ]).toArray();
+
+        res.json(posts);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+module.exports = {
+    createPost,
+    getPosts,
+    getUserPosts,
+    getExplorePosts,
+    toggleLike,
+    addComment,
+    deletePost,
+    getPostById,
+    toggleBookmark,
+    getBookmarkedPosts
+};
