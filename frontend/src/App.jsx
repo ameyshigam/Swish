@@ -13,6 +13,7 @@ import UserProfile from './pages/UserProfile';
 import EditProfile from './pages/EditProfile';
 import Notifications from './pages/Notifications';
 import Bookmarks from './pages/Bookmarks';
+import Announcements from './pages/AnnouncementsNew';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AdminDashboard from './pages/AdminDashboard';
@@ -80,6 +81,7 @@ function App() {
                 <Route path="profile/edit" element={<EditProfile />} />
                 <Route path="user/:id" element={<UserProfile />} />
                 <Route path="notifications" element={<Notifications />} />
+                <Route path="announcements" element={<Announcements />} />
                 <Route path="bookmarks" element={<Bookmarks />} />
                 <Route path="admin" element={
                   <AdminRoute>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, NavLink, Link } from 'react-router-dom';
-import { Home, Compass, Plus, User, LogOut, Shield, Bell, Bookmark, Menu, X, Sun, Moon } from 'lucide-react';
+import { Home, Compass, Plus, User, LogOut, Shield, Bell, Bookmark, Menu, X, Sun, Moon, Megaphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import axios from 'axios';
@@ -43,6 +43,7 @@ const MainLayout = () => {
         };
 
         fetchUnreadCount();
+        // announcements panel removed — no fetch needed
         const interval = setInterval(fetchUnreadCount, 30000);
         return () => clearInterval(interval);
     }, []);
@@ -68,12 +69,15 @@ const MainLayout = () => {
                     <NavItem to="/" icon={Home} label="Home" />
                     <NavItem to="/explore" icon={Compass} label="Explore" />
                     <NavItem to="/notifications" icon={Bell} label="Notifications" badge={unreadNotifications} />
+                    <NavItem to="/announcements" icon={Megaphone} label="Announcements" />
                     <NavItem to="/bookmarks" icon={Bookmark} label="Saved" />
                     <NavItem to="/profile" icon={User} label="Profile" />
                     {user?.role === 'Admin' && (
                         <NavItem to="/admin" icon={Shield} label="Admin" />
                     )}
                 </nav>
+
+                {/* Announcements panel removed to keep sidebar clean */}
 
                 {/* Create Post Button */}
                 <div className="p-4 border-t border-slate-100">
@@ -128,6 +132,7 @@ const MainLayout = () => {
                     <NavItem to="/" icon={Home} collapsed />
                     <NavItem to="/explore" icon={Compass} collapsed />
                     <NavItem to="/notifications" icon={Bell} badge={unreadNotifications} collapsed />
+                    <NavItem to="/announcements" icon={Megaphone} collapsed />
                     <NavItem to="/bookmarks" icon={Bookmark} collapsed />
                     <NavItem to="/profile" icon={User} collapsed />
                     {user?.role === 'Admin' && (
@@ -196,6 +201,7 @@ const MainLayout = () => {
                             <NavItem to="/explore" icon={Compass} label="Explore" onClick={closeMobileMenu} />
                             <NavItem to="/create" icon={Plus} label="Create Post" onClick={closeMobileMenu} />
                             <NavItem to="/notifications" icon={Bell} label="Notifications" badge={unreadNotifications} onClick={closeMobileMenu} />
+                            <NavItem to="/announcements" icon={Megaphone} label="Announcements" onClick={closeMobileMenu} />
                             <NavItem to="/bookmarks" icon={Bookmark} label="Saved" onClick={closeMobileMenu} />
                             <NavItem to="/profile" icon={User} label="Profile" onClick={closeMobileMenu} />
                             {user?.role === 'Admin' && (
