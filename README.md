@@ -68,7 +68,7 @@ Swish/
    # PORT=5000
    # MONGO_URI=your_mongodb_uri
    # JWT_SECRET=your_secret_key
-   npm run dev
+   node server.js
    ```
 
 3. **Frontend Setup:**
