@@ -11,6 +11,7 @@ const protect = (req, res, next) => {
             req.user = decoded;
             return next();
         } catch (error) {
+            console.error('Auth Middleware Error:', error.message);
             return res.status(401).json({ message: 'Not authorized, token failed' });
         }
     }
@@ -28,5 +29,13 @@ const adminOnly = (req, res, next) => {
     }
 };
 
-module.exports = { protect, adminOnly };
+const adminOrTeacher = (req, res, next) => {
+    if (req.user && (req.user.role === 'Admin' || req.user.role === 'Faculty')) {
+        return next();
+    } else {
+        return res.status(403).json({ message: 'Not authorized as Admin or Faculty' });
+    }
+};
+
+module.exports = { protect, adminOnly, adminOrTeacher };
 

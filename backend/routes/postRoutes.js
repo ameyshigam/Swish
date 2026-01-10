@@ -58,7 +58,7 @@ router.get('/:id', protect, getPostById);
 router.put('/:id/like', protect, toggleLike);
 router.put('/:id/bookmark', protect, toggleBookmark);
 router.post('/:id/comment', protect, addComment);
-router.delete('/:id', protect, adminOnly, deletePost);
+router.delete('/:id', protect, deletePost);
 
 module.exports = router;
 

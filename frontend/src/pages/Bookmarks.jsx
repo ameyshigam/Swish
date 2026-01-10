@@ -39,7 +39,7 @@ const Bookmarks = () => {
                     <Bookmark className="text-white" size={20} />
                 </div>
                 <div>
-                    <h2 className="text-xl font-bold text-slate-900">Saved</h2>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Saved</h2>
                     <p className="text-slate-500 text-sm">{posts.length} {posts.length === 1 ? 'post' : 'posts'} saved</p>
                 </div>
             </div>

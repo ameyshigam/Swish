@@ -9,22 +9,50 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Configure axios base URL
+    // Configure axios base URL (match backend PORT)
     axios.defaults.baseURL = 'http://localhost:5001/api';
+
+    // Setup Axios Interceptors
+    useEffect(() => {
+        const requestInterceptor = axios.interceptors.request.use(
+            (config) => {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+                return config;
+            },
+            (error) => Promise.reject(error)
+        );
+
+        const responseInterceptor = axios.interceptors.response.use(
+            (response) => response,
+            (error) => {
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem('token');
+                    setUser(null);
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => {
+            axios.interceptors.request.eject(requestInterceptor);
+            axios.interceptors.response.eject(responseInterceptor);
+        };
+    }, []);
 
     const fetchUser = async () => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                // Header is handled by interceptor now, but keeping for safety
                 const res = await axios.get('/auth/me');
                 setUser(res.data);
                 return res.data;
             } catch (error) {
                 console.error("Auth Check Failed", error);
-                localStorage.removeItem('token');
-                delete axios.defaults.headers.common['Authorization'];
-                setUser(null);
+                // 401 handled by interceptor
                 return null;
             }
         }

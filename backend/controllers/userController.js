@@ -19,6 +19,7 @@ const getUserProfile = async (req, res) => {
         // Check if current user is following this profile
         const currentUser = await User.findById(req.user.id);
         const isFollowing = currentUser?.following?.some(id => id.toString() === userId);
+        const hasRequested = currentUser?.sentRequests?.some(id => id.toString() === userId);
 
         res.json({
             id: user._id,
@@ -30,6 +31,7 @@ const getUserProfile = async (req, res) => {
             followingCount: user.following?.length || 0,
             postCount: posts.length,
             isFollowing,
+            hasRequested,
             isOwnProfile: req.user.id === userId,
             createdAt: user.createdAt
         });
@@ -43,21 +45,19 @@ const getUserProfile = async (req, res) => {
 const updateProfile = async (req, res) => {
     try {
         const { bio, location, website } = req.body;
+        const profileUpdates = {};
 
-        // Fetch existing user to preserve avatar URL
-        const existingUser = await User.findById(req.user.id);
-        const existingProfileData = existingUser?.profileData || {};
+        if (bio !== undefined) profileUpdates.bio = bio;
+        if (location !== undefined) profileUpdates.location = location;
+        if (website !== undefined) profileUpdates.website = website;
 
-        const profileData = {
-            bio: bio !== undefined ? bio : (existingProfileData.bio || ''),
-            location: location !== undefined ? location : (existingProfileData.location || ''),
-            website: website !== undefined ? website : (existingProfileData.website || ''),
-            avatarUrl: existingProfileData.avatarUrl || '' // Preserve existing avatar
-        };
+        await User.updateProfile(req.user.id, profileUpdates);
 
-        const result = await User.updateProfile(req.user.id, profileData);
+        // Fetch updated user to return complete profile data
+        const updatedUser = await User.findById(req.user.id);
+        const profileData = updatedUser?.profileData || {};
 
-        console.log('Profile update result:', result); // Debug log
+        console.log('Profile updated for user:', req.user.id);
 
         res.json({ message: 'Profile updated', profileData });
     } catch (error) {
@@ -83,7 +83,7 @@ const updateAvatar = async (req, res) => {
     }
 };
 
-// Follow/Unfollow user
+// Follow/Unfollow user (Send Request)
 const toggleFollow = async (req, res) => {
     try {
         const targetUserId = req.params.id;
@@ -94,12 +94,55 @@ const toggleFollow = async (req, res) => {
 
         const result = await User.toggleFollow(req.user.id, targetUserId);
 
-        // Send notification if followed (not unfollowed)
-        if (result.followed) {
-            await Notification.createFollowNotification(req.user.id, targetUserId);
+        if (result.status === 'requested') {
+            await Notification.createFollowRequestNotification(req.user.id, targetUserId);
+            return res.json({ message: 'Follow request sent', status: 'requested' });
+        } else if (result.status === 'unfollowed') {
+            return res.json({ message: 'Unfollowed user', status: 'unfollowed' });
+        } else if (result.status === 'already_requested_or_following') {
+            return res.status(400).json({ message: 'Already requested or following' });
         }
-
+        
         res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+const respondToFollowRequest = async (req, res) => {
+    try {
+        const { requesterId, action } = req.body; // action: 'accept' or 'reject'
+        
+        if (action === 'accept') {
+            await User.acceptFollowRequest(req.user.id, requesterId);
+            
+            // Notify the requester that their request was accepted
+            await Notification.createFollowAcceptNotification(req.user.id, requesterId);
+            
+            // Update the original request notification for the current user
+            await Notification.handleFollowRequestResponse(requesterId, req.user.id, 'accept');
+            
+            res.json({ message: 'Request accepted', status: 'accepted' });
+        } else if (action === 'reject') {
+            await User.rejectFollowRequest(req.user.id, requesterId);
+            // Remove the original request notification
+            await Notification.handleFollowRequestResponse(requesterId, req.user.id, 'reject');
+            
+            res.json({ message: 'Request rejected', status: 'rejected' });
+        } else {
+            res.status(400).json({ message: 'Invalid action' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+const getFollowRequests = async (req, res) => {
+    try {
+        const requests = await User.getFollowRequests(req.user.id);
+        res.json(requests);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
@@ -178,5 +221,7 @@ module.exports = {
     getFollowing,
     searchUsers,
     getSuggestedUsers,
-    getUserPosts
+    getUserPosts,
+    respondToFollowRequest,
+    getFollowRequests
 };

@@ -1,23 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import axios from 'axios';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [stats, setStats] = useState({ users: 0, posts: 0, communities: 0 });
     const { login } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await axios.get('/auth/public-stats');
+                setStats(res.data);
+            } catch (err) {
+                console.error("Failed to fetch public stats", err);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    const formatCount = (num) => {
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'K+';
+        return num + '+';
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
         try {
-            await login(email, password);
-            navigate('/');
+            const res = await login(email, password);
+            const role = res?.user?.role;
+            if (role === 'Admin') navigate('/admin');
+            else navigate('/');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to login');
         } finally {
@@ -54,15 +75,15 @@ const Login = () => {
 
                     <div className="mt-16 flex gap-12">
                         <div>
-                            <div className="text-3xl font-bold">500+</div>
+                            <div className="text-3xl font-bold">{formatCount(stats.users)}</div>
                             <div className="text-slate-500 text-sm mt-1">Active Users</div>
                         </div>
                         <div>
-                            <div className="text-3xl font-bold">2K+</div>
+                            <div className="text-3xl font-bold">{formatCount(stats.posts)}</div>
                             <div className="text-slate-500 text-sm mt-1">Posts Shared</div>
                         </div>
                         <div>
-                            <div className="text-3xl font-bold">10+</div>
+                            <div className="text-3xl font-bold">{formatCount(stats.communities)}</div>
                             <div className="text-slate-500 text-sm mt-1">Communities</div>
                         </div>
                     </div>

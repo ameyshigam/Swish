@@ -7,7 +7,8 @@ const {
     getPendingCount,
     getAllPosts,
     deletePost,
-    getAdminStats
+    getAdminStats,
+    banUser
 } = require('../controllers/adminController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
@@ -21,5 +22,6 @@ router.get('/reports/pending-count', protect, adminOnly, getPendingCount);
 router.put('/reports/:id', protect, adminOnly, updateReportStatus);
 router.get('/posts', protect, adminOnly, getAllPosts);
 router.delete('/posts/:id', protect, adminOnly, deletePost);
+router.put('/users/:id/ban', protect, adminOnly, banUser);
 
 module.exports = router;

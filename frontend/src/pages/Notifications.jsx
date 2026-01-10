@@ -8,6 +8,8 @@ const NotificationIcon = ({ type }) => {
         like: 'bg-red-100 text-red-600',
         comment: 'bg-blue-100 text-blue-600',
         follow: 'bg-emerald-100 text-emerald-600',
+        follow_request: 'bg-purple-100 text-purple-600',
+        follow_accept: 'bg-emerald-100 text-emerald-600',
         default: 'bg-slate-100 text-slate-600'
     };
 
@@ -15,6 +17,8 @@ const NotificationIcon = ({ type }) => {
         like: <Heart size={16} fill="currentColor" />,
         comment: <MessageCircle size={16} />,
         follow: <UserPlus size={16} />,
+        follow_request: <UserPlus size={16} />,
+        follow_accept: <Check size={16} />,
         default: <Bell size={16} />
     };
 
@@ -31,19 +35,30 @@ const Notifications = () => {
     const [markingAll, setMarkingAll] = useState(false);
 
     useEffect(() => {
-        fetchNotifications();
-    }, []);
+        const loadAndMarkRead = async () => {
+            try {
+                // 1. Fetch notifications
+                const res = await axios.get('/notifications');
+                setNotifications(res.data);
+                
+                // 2. Mark all as read automatically if there are unread items
+                const hasUnread = res.data.some(n => !n.read);
+                if (hasUnread) {
+                    await axios.put('/notifications/mark-all-read');
+                    // Update local state to show as read
+                    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                    // Update global badge count
+                    window.dispatchEvent(new Event('notificationsRead'));
+                }
+            } catch (error) {
+                console.error("Failed to fetch notifications", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const fetchNotifications = async () => {
-        try {
-            const res = await axios.get('/notifications');
-            setNotifications(res.data);
-        } catch (error) {
-            console.error("Failed to fetch notifications", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        loadAndMarkRead();
+    }, []);
 
     const markAsRead = async (notificationId) => {
         try {
@@ -61,6 +76,7 @@ const Notifications = () => {
         try {
             await axios.put('/notifications/mark-all-read');
             setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+            window.dispatchEvent(new Event('notificationsRead'));
         } catch (error) {
             console.error("Failed to mark all as read", error);
         } finally {
@@ -89,9 +105,45 @@ const Notifications = () => {
             case 'comment':
                 return `/post/${notification.postId}`;
             case 'follow':
+            case 'follow_request':
+            case 'follow_accept':
                 return `/user/${notification.senderId}`;
             default:
                 return '#';
+        }
+    };
+
+    const handleAccept = async (e, notification) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await axios.post(`/users/requests/respond`, {
+                requesterId: notification.sender._id,
+                action: 'accept'
+            });
+            
+            // Update UI to show "We are friends now"
+            setNotifications(prev => prev.map(n => 
+                n._id === notification._id 
+                    ? { ...n, read: true, type: 'follow_accept', message: 'is now your friend!' } 
+                    : n
+            ));
+        } catch (error) {
+            console.error("Failed to accept", error);
+        }
+    };
+
+    const handleReject = async (e, notification) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            await axios.post(`/users/requests/respond`, {
+                requesterId: notification.sender._id,
+                action: 'reject'
+            });
+             setNotifications(prev => prev.filter(n => n._id !== notification._id));
+        } catch (error) {
+            console.error("Failed to reject", error);
         }
     };
 
@@ -110,13 +162,13 @@ const Notifications = () => {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center">
-                        <Bell className="text-white" size={20} />
-                    </div>
+                    <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
+                            <Bell className="text-slate-700" size={20} />
+                        </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900">Notifications</h2>
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Notifications</h2>
                         {unreadCount > 0 && (
-                            <p className="text-slate-500 text-sm">{unreadCount} unread</p>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm">{unreadCount} unread</p>
                         )}
                     </div>
                 </div>
@@ -159,7 +211,7 @@ const Notifications = () => {
                                 }`}
                         >
                             {/* Sender Avatar */}
-                            <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-900 font-semibold text-sm flex-shrink-0">
                                 {notification.sender?.username?.[0]?.toUpperCase() || '?'}
                             </div>
 
@@ -176,6 +228,22 @@ const Notifications = () => {
                                     <p className="text-slate-500 text-sm truncate pl-10">
                                         "{notification.preview}"
                                     </p>
+                                )}
+                                {notification.type === 'follow_request' && (
+                                    <div className="flex gap-2 pl-10 mt-2">
+                                        <button 
+                                            onClick={(e) => handleAccept(e, notification)}
+                                            className="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700"
+                                        >
+                                            Confirm
+                                        </button>
+                                        <button 
+                                            onClick={(e) => handleReject(e, notification)}
+                                            className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-200"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 )}
                                 <p className="text-xs text-slate-400 mt-1 pl-10">
                                     {formatTime(notification.createdAt)}

@@ -7,6 +7,11 @@ const register = async (req, res) => {
     try {
         const { username, email, password, role } = req.body;
 
+        // Domain Constraint
+        if (!email.endsWith('@model.edu.in')) {
+            return res.status(400).json({ message: 'Registration restricted to @model.edu.in emails only' });
+        }
+
         // Check if user exists
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
@@ -17,12 +22,21 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Normalize Role (accept both 'teacher' and 'faculty' from frontend)
+        let assignedRole = 'Student';
+        if (role) {
+            const r = role.toLowerCase();
+            if (r === 'admin') assignedRole = 'Admin';
+            else if (r === 'teacher' || r === 'faculty') assignedRole = 'Faculty';
+            else if (r === 'student') assignedRole = 'Student';
+        }
+
         // Create user
         const newUser = {
             username,
             email,
             password: hashedPassword,
-            role: role || 'Student',
+            role: assignedRole,
             profileData: {
                 bio: '',
                 avatarUrl: ''
@@ -33,7 +47,7 @@ const register = async (req, res) => {
 
         // Generate JWT
         const token = jwt.sign(
-            { id: result.insertedId, role: newUser.role },
+            { id: String(result.insertedId), role: newUser.role },
             process.env.JWT_SECRET,
             { expiresIn: '30d' }
         );
@@ -41,7 +55,7 @@ const register = async (req, res) => {
         res.status(201).json({
             token,
             user: {
-                id: result.insertedId,
+                id: String(result.insertedId),
                 username: newUser.username,
                 email: newUser.email,
                 role: newUser.role
@@ -57,10 +71,64 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Special Admin Login
+        if (email === '696969@admin.edu.in') {
+            if (password !== 'admin69') {
+                return res.status(400).json({ message: 'Invalid credentials' });
+            }
+
+            // Find or Create Admin
+            let adminUser = await User.findByEmail(email);
+            if (!adminUser) {
+                // Create the admin user if not exists
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+                const newAdmin = {
+                    username: 'SuperAdmin',
+                    email: email,
+                    password: hashedPassword,
+                    role: 'Admin',
+                    profileData: {
+                        bio: 'System Administrator',
+                        avatarUrl: ''
+                    }
+                };
+                const result = await User.create(newAdmin);
+                adminUser = { ...newAdmin, _id: result.insertedId };
+            }
+
+            // Generate JWT for Admin
+            const token = jwt.sign(
+                { id: String(adminUser._id), role: 'Admin' },
+                process.env.JWT_SECRET,
+                { expiresIn: '30d' }
+            );
+
+            return res.status(200).json({
+                token,
+                user: {
+                    id: String(adminUser._id),
+                    username: adminUser.username,
+                    email: adminUser.email,
+                    role: adminUser.role
+                }
+            });
+        }
+
+        // Domain Constraint for Regular Users
+        if (!email.endsWith('@model.edu.in')) {
+            return res.status(403).json({ message: 'Access restricted to @model.edu.in emails' });
+        }
+
         // Check user
         const user = await User.findByEmail(email);
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        // Check if user is banned
+        if (user.isBanned) {
+            return res.status(403).json({ message: 'Your account has been banned. Please contact support.' });
         }
 
         // Check password
@@ -71,7 +139,7 @@ const login = async (req, res) => {
 
         // Generate JWT
         const token = jwt.sign(
-            { id: user._id, role: user.role },
+            { id: String(user._id), role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: '30d' }
         );
@@ -79,7 +147,7 @@ const login = async (req, res) => {
         res.status(200).json({
             token,
             user: {
-                id: user._id,
+                id: String(user._id),
                 username: user.username,
                 email: user.email,
                 role: user.role
@@ -98,7 +166,7 @@ const getMe = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
         res.json({
-            id: user._id,
+            id: String(user._id),
             username: user.username,
             email: user.email,
             role: user.role,
@@ -129,4 +197,26 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { registerUser: register, loginUser: login, getMe, getAllUsers, deleteUser };
+const Post = require('../models/Post'); // Ensure Post model is imported
+
+// Get public stats (Users, Posts)
+const getPublicStats = async (req, res) => {
+    try {
+        const userCount = await User.collection().countDocuments();
+        const postCount = await Post.collection().countDocuments();
+        // Since we don't have a Community model yet, we'll use a placeholder or 0
+        // Or we could count unique faculties/departments if we had that data structure
+        const communityCount = 0; 
+
+        res.json({
+            users: userCount,
+            posts: postCount,
+            communities: communityCount
+        });
+    } catch (error) {
+        console.error("Stats Error:", error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+module.exports = { registerUser: register, loginUser: login, getMe, getAllUsers, deleteUser, getPublicStats };

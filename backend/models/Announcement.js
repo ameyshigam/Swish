@@ -1,7 +1,13 @@
 const { getDB } = require('../config/db');
 const { ObjectId } = require('mongodb');
 
-const VALID_CATEGORIES = ['Examination', 'Cultural', 'Technical Clubs', 'Scholarship'];
+const VALID_CATEGORIES = [
+    'Latest announcements',
+    'Exam Notifications',
+    'Scholarship Section',
+    'Cultural Events',
+    'IEEE & CSI'
+];
 
 class Announcement {
     static collection() {
@@ -9,7 +15,16 @@ class Announcement {
     }
 
     static async create(data) {
-        const category = VALID_CATEGORIES.includes(data.category) ? data.category : 'Examination';
+        // Case-insensitive category matching
+        let category = 'Latest announcements';
+        const providedCategory = data.category;
+        
+        if (providedCategory) {
+            const match = VALID_CATEGORIES.find(c => c.toLowerCase() === providedCategory.toLowerCase());
+            if (match) {
+                category = match;
+            }
+        }
 
         const doc = {
             subject: data.subject,
@@ -17,6 +32,8 @@ class Announcement {
             priority: data.priority || 'Medium',
             category,
             photo: data.photo || null,
+            fileUrl: data.fileUrl || null,
+            targetSection: data.targetSection || null, // For scholarship notices
             createdBy: data.createdBy ? new ObjectId(data.createdBy) : null,
             createdAt: new Date()
         };
@@ -33,6 +50,14 @@ class Announcement {
         if (category && VALID_CATEGORIES.includes(category)) q.category = category;
 
         return await this.collection().find(q).sort({ createdAt: -1 }).limit(limit).toArray();
+    }
+
+    static async delete(id) {
+        return await this.collection().deleteOne({ _id: new ObjectId(id) });
+    }
+
+    static async findById(id) {
+        return await this.collection().findOne({ _id: new ObjectId(id) });
     }
 }
 

@@ -102,6 +102,7 @@ const getAdminStats = async (req, res) => {
         const userCount = await User.collection().countDocuments();
         const postCount = await Post.collection().countDocuments();
         const pendingReports = await Report.getPendingCount();
+        const totalReports = await Report.collection().countDocuments();
 
         // Get user breakdown by role
         const roleStats = await User.collection().aggregate([
@@ -109,11 +110,32 @@ const getAdminStats = async (req, res) => {
         ]).toArray();
 
         res.json({
-            userCount,
-            postCount,
+            users: userCount,
+            posts: postCount,
             pendingReports,
+            reports: totalReports,
             roleStats
         });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+// Admin: Ban/Unban user
+const banUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const user = await User.findById(id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const newStatus = !user.isBanned;
+        await User.collection().updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { isBanned: newStatus } }
+        );
+
+        res.json({ message: `User ${newStatus ? 'banned' : 'unbanned'}`, isBanned: newStatus });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
@@ -127,5 +149,6 @@ module.exports = {
     getPendingCount,
     getAllPosts,
     deletePost,
-    getAdminStats
+    getAdminStats,
+    banUser
 };

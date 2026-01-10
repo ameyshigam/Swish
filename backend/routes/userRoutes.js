@@ -11,7 +11,9 @@ const {
     getFollowing,
     searchUsers,
     getSuggestedUsers,
-    getUserPosts
+    getUserPosts,
+    respondToFollowRequest,
+    getFollowRequests
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -60,6 +62,12 @@ router.get('/:id/posts', protect, getUserPosts);
 
 // Follow/Unfollow
 router.put('/:id/follow', protect, toggleFollow);
+
+// Respond to follow request
+router.post('/requests/respond', protect, respondToFollowRequest);
+
+// Get follow requests
+router.get('/requests/pending', protect, getFollowRequests);
 
 // Get followers
 router.get('/:id/followers', protect, getFollowers);

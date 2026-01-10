@@ -70,6 +70,50 @@ class Post {
         ]).toArray();
     }
 
+    static async findFeed(followingIds, userId, skip = 0, limit = 10) {
+        // followingIds is an array of ObjectIds of people the user follows (and who accepted)
+        // We also want to see our own posts? Usually yes.
+        const idsToFetch = [...followingIds, new ObjectId(userId)];
+
+        return await this.collection().aggregate([
+            { 
+                $match: { 
+                    authorId: { $in: idsToFetch } 
+                } 
+            },
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'authorId',
+                    foreignField: '_id',
+                    as: 'author'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$author',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    'author.password': 0,
+                    'author.email': 0
+                }
+            }
+        ]).toArray();
+    }
+
+    static async getFeedCount(followingIds, userId) {
+        const idsToFetch = [...followingIds, new ObjectId(userId)];
+        return await this.collection().countDocuments({
+            authorId: { $in: idsToFetch }
+        });
+    }
+
     static async getCount() {
         return await this.collection().countDocuments();
     }

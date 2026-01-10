@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import axios from 'axios';
 import PostCard from '../components/PostCard';
 import Button from '../components/Button';
-import { Settings, MapPin, Calendar, UserPlus, UserMinus, ArrowLeft, Loader2, Image, Users, Grid, BookOpen, Link as LinkIcon, Lock } from 'lucide-react';
+import { Settings, MapPin, Calendar, UserPlus, UserMinus, ArrowLeft, Loader2, Image, Users, Grid, BookOpen, Link as LinkIcon, Lock, Clock } from 'lucide-react';
 
 const UserProfile = () => {
     const { id } = useParams();
     const { user: currentUser } = useAuth();
+    const { success, error: toastError } = useToast();
     const [profile, setProfile] = useState(null);
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -43,11 +45,33 @@ const UserProfile = () => {
         setFollowLoading(true);
         try {
             const res = await axios.put(`/users/${userId}/follow`);
-            setProfile(prev => ({
-                ...prev,
-                isFollowing: res.data.followed,
-                followerCount: res.data.followed ? prev.followerCount + 1 : prev.followerCount - 1
-            }));
+            const status = res.data.status;
+            
+            setProfile(prev => {
+                let newIsFollowing = prev.isFollowing;
+                let newHasRequested = prev.hasRequested;
+                let newFollowerCount = prev.followerCount;
+
+                if (status === 'requested') {
+                    newHasRequested = true;
+                    newIsFollowing = false;
+                } else if (status === 'unfollowed') {
+                    newHasRequested = false;
+                    newIsFollowing = false;
+                    newFollowerCount = Math.max(0, prev.followerCount - 1);
+                } else if (status === 'accepted') {
+                     newIsFollowing = true;
+                     newHasRequested = false;
+                     newFollowerCount = prev.followerCount + 1;
+                }
+
+                return {
+                    ...prev,
+                    isFollowing: newIsFollowing,
+                    hasRequested: newHasRequested,
+                    followerCount: newFollowerCount
+                };
+            });
         } catch (error) {
             console.error("Failed to toggle follow", error);
         } finally {
@@ -129,17 +153,25 @@ const UserProfile = () => {
                                     ) : (
                                         <button
                                             onClick={handleFollow}
-                                            disabled={followLoading}
-                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${profile.isFollowing
-                                                ? 'bg-slate-100 text-slate-700 hover:bg-red-50 hover:text-red-600'
-                                                : 'bg-slate-900 text-white hover:bg-slate-800'
+                                            disabled={followLoading || (profile.hasRequested && !profile.isFollowing)}
+                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors group ${
+                                                profile.isFollowing
+                                                ? 'bg-emerald-50 text-emerald-600 hover:bg-red-50 hover:text-red-600'
+                                                : profile.hasRequested
+                                                    ? 'bg-slate-100 text-slate-700'
+                                                    : 'bg-slate-900 text-white hover:bg-slate-800'
                                                 }`}
                                         >
                                             {followLoading ? (
                                                 <Loader2 className="animate-spin" size={16} />
                                             ) : profile.isFollowing ? (
                                                 <>
-                                                    <UserMinus size={16} /> Unfollow
+                                                    <span className="group-hover:hidden flex items-center gap-2"><Users size={16} /> Friends</span>
+                                                    <span className="hidden group-hover:flex items-center gap-2"><UserMinus size={16} /> Unfollow</span>
+                                                </>
+                                            ) : profile.hasRequested ? (
+                                                <>
+                                                    <Clock size={16} /> Requested
                                                 </>
                                             ) : (
                                                 <>

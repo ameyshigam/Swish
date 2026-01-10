@@ -21,6 +21,12 @@ const EditProfile = () => {
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [avatarFile, setAvatarFile] = useState(null);
 
+    const getMediaUrl = (path) => {
+        if (!path) return null;
+        if (path.startsWith('http')) return path;
+        return `http://localhost:5001${path.startsWith('/') ? '' : '/'}${path}`;
+    };
+
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -32,7 +38,7 @@ const EditProfile = () => {
                     website: profileData.website || ''
                 });
                 if (profileData.avatarUrl) {
-                    setAvatarPreview(`http://localhost:5001${profileData.avatarUrl}`);
+                    setAvatarPreview(getMediaUrl(profileData.avatarUrl));
                 }
             } catch (error) {
                 console.error("Failed to fetch profile", error);

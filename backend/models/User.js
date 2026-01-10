@@ -29,14 +29,16 @@ class User {
     }
 
     static async updateProfile(userId, profileData) {
+        // Convert profileData to dot notation to avoid overwriting entire object
+        const updateFields = {};
+        for (const [key, value] of Object.entries(profileData)) {
+            updateFields[`profileData.${key}`] = value;
+        }
+        updateFields['updatedAt'] = new Date();
+
         const result = await this.collection().updateOne(
             { _id: new ObjectId(userId) },
-            {
-                $set: {
-                    profileData,
-                    updatedAt: new Date()
-                }
-            }
+            { $set: updateFields }
         );
         return result;
     }
@@ -48,38 +50,105 @@ class User {
         );
     }
 
-    static async toggleFollow(userId, targetUserId) {
+    static async sendFollowRequest(userId, targetUserId) {
         const user = await this.findById(userId);
         const targetUser = await this.findById(targetUserId);
 
-        if (!user || !targetUser) {
-            throw new Error('User not found');
+        if (!user || !targetUser) throw new Error('User not found');
+
+        // Check if already following or requested
+        const isFollowing = user.following?.some(id => id.toString() === targetUserId);
+        const hasRequested = user.sentRequests?.some(id => id.toString() === targetUserId);
+
+        if (isFollowing || hasRequested) {
+            return { status: 'already_requested_or_following' };
         }
 
+        // Add to sender's sentRequests
+        await this.collection().updateOne(
+            { _id: new ObjectId(userId) },
+            { $addToSet: { sentRequests: new ObjectId(targetUserId) } }
+        );
+
+        // Add to target's followRequests
+        await this.collection().updateOne(
+            { _id: new ObjectId(targetUserId) },
+            { $addToSet: { followRequests: new ObjectId(userId) } }
+        );
+
+        return { status: 'requested' };
+    }
+
+    static async acceptFollowRequest(userId, requesterId) {
+        // userId is the one accepting (target), requesterId is the one who sent request
+        
+        // Mutual Follow Logic: Accepting a request creates a two-way friendship
+        
+        // 1. Update Target User (Accepter)
+        await this.collection().updateOne(
+            { _id: new ObjectId(userId) },
+            { 
+                $pull: { followRequests: new ObjectId(requesterId) },
+                $addToSet: { 
+                    followers: new ObjectId(requesterId),
+                    following: new ObjectId(requesterId) // Auto-follow back
+                }
+            }
+        );
+
+        // 2. Update Requester User
+        await this.collection().updateOne(
+            { _id: new ObjectId(requesterId) },
+            {
+                $addToSet: {
+                    followers: new ObjectId(userId), // Auto-follow back
+                    following: new ObjectId(userId)
+                }
+            }
+        );
+
+        return { status: 'accepted' };
+    }
+
+    static async rejectFollowRequest(userId, requesterId) {
+        await this.collection().updateOne(
+            { _id: new ObjectId(userId) },
+            { $pull: { followRequests: new ObjectId(requesterId) } }
+        );
+
+        await this.collection().updateOne(
+            { _id: new ObjectId(requesterId) },
+            { $pull: { sentRequests: new ObjectId(userId) } }
+        );
+
+        return { status: 'rejected' };
+    }
+
+    static async unfollow(userId, targetUserId) {
+        await this.collection().updateOne(
+            { _id: new ObjectId(userId) },
+            { $pull: { following: new ObjectId(targetUserId) } }
+        );
+        await this.collection().updateOne(
+            { _id: new ObjectId(targetUserId) },
+            { $pull: { followers: new ObjectId(userId) } }
+        );
+        return { status: 'unfollowed' };
+    }
+
+    static async toggleFollow(userId, targetUserId) {
+        // Deprecated or modify to use new logic if needed, but keeping for backward compatibility
+        // For this task, we prefer the request system. 
+        // We will repurpose this to just handle unfollow if already following.
+        // If not following, it should probably call sendFollowRequest.
+        
+        const user = await this.findById(userId);
         const isFollowing = user.following?.some(id => id.toString() === targetUserId);
 
         if (isFollowing) {
-            // Unfollow
-            await this.collection().updateOne(
-                { _id: new ObjectId(userId) },
-                { $pull: { following: new ObjectId(targetUserId) } }
-            );
-            await this.collection().updateOne(
-                { _id: new ObjectId(targetUserId) },
-                { $pull: { followers: new ObjectId(userId) } }
-            );
-            return { followed: false };
+            return await this.unfollow(userId, targetUserId);
         } else {
-            // Follow
-            await this.collection().updateOne(
-                { _id: new ObjectId(userId) },
-                { $addToSet: { following: new ObjectId(targetUserId) } }
-            );
-            await this.collection().updateOne(
-                { _id: new ObjectId(targetUserId) },
-                { $addToSet: { followers: new ObjectId(userId) } }
-            );
-            return { followed: true };
+            return await this.sendFollowRequest(userId, targetUserId);
         }
     }
 
@@ -103,6 +172,16 @@ class User {
         ).toArray();
     }
 
+    static async getFollowRequests(userId) {
+        const user = await this.findById(userId);
+        if (!user) return [];
+
+        return await this.collection().find(
+            { _id: { $in: user.followRequests || [] } },
+            { projection: { password: 0 } }
+        ).toArray();
+    }
+
     static async searchUsers(query, limit = 10) {
         return await this.collection().find(
             {
@@ -119,6 +198,7 @@ class User {
         // Get users that current user is not following
         const user = await this.findById(userId);
         const following = user?.following || [];
+        const sentRequests = user?.sentRequests || [];
 
         return await this.collection().aggregate([
             {
@@ -131,7 +211,8 @@ class User {
             },
             {
                 $addFields: {
-                    followerCount: { $size: { $ifNull: ['$followers', []] } }
+                    followerCount: { $size: { $ifNull: ['$followers', []] } },
+                    hasRequested: { $in: ['$_id', sentRequests] }
                 }
             },
             { $sort: { followerCount: -1 } },
@@ -164,6 +245,13 @@ class User {
     static async getBookmarks(userId) {
         const user = await this.findById(userId);
         return user?.bookmarks || [];
+    }
+
+    static async findAllStudents() {
+        // Assuming students have role 'Student' or undefined (if default)
+        // Adjust query based on actual data. For now, assuming explicit role 'Student'
+        // If your system defaults to Student, use { $or: [{ role: 'Student' }, { role: { $exists: false } }] }
+        return await this.collection().find({ role: 'Student' }).toArray();
     }
 }
 

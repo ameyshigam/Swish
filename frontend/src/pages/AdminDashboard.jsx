@@ -1,88 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trash2, Shield, Users, AlertTriangle, FileText, Eye, CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Shield, Users, AlertTriangle, FileText, Loader2, Compass, Search } from 'lucide-react';
+import PostCard from '../components/PostCard';
 
 const AdminDashboard = () => {
-    const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState(null);
-    const [users, setUsers] = useState([]);
-    const [reports, setReports] = useState([]);
-    const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [posts, setPosts] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [searching, setSearching] = useState(false);
 
     useEffect(() => {
-        fetchData();
-    }, [activeTab]);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            if (activeTab === 'overview') {
-                const res = await axios.get('/admin/stats');
-                setStats(res.data);
-            } else if (activeTab === 'users') {
-                const res = await axios.get('/auth/users');
-                setUsers(res.data);
-            } else if (activeTab === 'reports') {
-                const res = await axios.get('/admin/reports');
-                setReports(res.data);
-            } else if (activeTab === 'posts') {
-                const res = await axios.get('/admin/posts');
-                setPosts(res.data);
+        const fetchData = async () => {
+            try {
+                const [statsRes, postsRes] = await Promise.all([
+                    axios.get('/admin/stats'),
+                    axios.get('/posts/explore')
+                ]);
+                setStats(statsRes.data);
+                setPosts(postsRes.data);
+            } catch (err) {
+                console.error("Failed to fetch dashboard data", err);
+                setError("Failed to load dashboard data.");
+            } finally {
+                setLoading(false);
             }
-        } catch (err) {
-            console.error("Failed to fetch data", err);
-            setError("Failed to load data. Are you an admin?");
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
 
-    const handleDeleteUser = async (userId) => {
-        if (!window.confirm("Are you sure you want to delete this user? This cannot be undone.")) return;
+        fetchData();
+    }, []);
 
-        try {
-            await axios.delete(`/auth/users/${userId}`);
-            setUsers(users.filter(u => u._id !== userId));
-        } catch (err) {
-            alert("Failed to delete user");
-            console.error(err);
-        }
-    };
+    useEffect(() => {
+        const searchUsers = async () => {
+            if (searchQuery.length < 2) {
+                setSearchResults([]);
+                return;
+            }
 
-    const handleDeletePost = async (postId) => {
-        if (!window.confirm("Are you sure you want to delete this post?")) return;
+            setSearching(true);
+            try {
+                const res = await axios.get(`/users/search?q=${searchQuery}`);
+                setSearchResults(res.data);
+            } catch (err) {
+                console.error("Search failed:", err);
+            } finally {
+                setSearching(false);
+            }
+        };
 
-        try {
-            await axios.delete(`/admin/posts/${postId}`);
-            setPosts(posts.filter(p => p._id !== postId));
-        } catch (err) {
-            alert("Failed to delete post");
-            console.error(err);
-        }
-    };
+        const debounce = setTimeout(searchUsers, 300);
+        return () => clearTimeout(debounce);
+    }, [searchQuery]);
 
-    const handleUpdateReport = async (reportId, status) => {
-        try {
-            await axios.put(`/admin/reports/${reportId}`, { status });
-            setReports(reports.map(r => r._id === reportId ? { ...r, status } : r));
-        } catch (err) {
-            alert("Failed to update report");
-            console.error(err);
-        }
-    };
-
-    const tabs = [
-        { id: 'overview', label: 'Overview', icon: Shield },
-        { id: 'users', label: 'Users', icon: Users },
-        { id: 'reports', label: 'Reports', icon: AlertTriangle },
-        { id: 'posts', label: 'Posts', icon: FileText },
-    ];
-
-    if (loading && !stats && !users.length && !reports.length && !posts.length) {
+    if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
                 <Loader2 className="animate-spin text-blue-500" size={32} />
@@ -96,249 +68,107 @@ const AdminDashboard = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="glass rounded-3xl p-8 bg-gradient-to-r from-slate-800 to-slate-900 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                <div className="relative z-10">
-                    <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-                        <Shield className="text-blue-400" /> Admin Dashboard
-                    </h1>
-                    <p className="text-slate-400">Manage users, content, and reports.</p>
+            <h1 className="text-2xl font-bold text-slate-100">Dashboard Overview</h1>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
+                            <Users size={24} />
+                        </div>
+                    </div>
+                    <h3 className="text-slate-500 text-sm font-medium">Total Users</h3>
+                    <p className="text-3xl font-bold text-slate-900 mt-1">{stats?.users || 0}</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg">
+                            <FileText size={24} />
+                        </div>
+                    </div>
+                    <h3 className="text-slate-500 text-sm font-medium">Total Posts</h3>
+                    <p className="text-3xl font-bold text-slate-900 mt-1">{stats?.posts || 0}</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 bg-orange-50 text-orange-600 rounded-lg">
+                            <AlertTriangle size={24} />
+                        </div>
+                    </div>
+                    <h3 className="text-slate-500 text-sm font-medium">Pending Reports</h3>
+                    <p className="text-3xl font-bold text-slate-900 mt-1">{stats?.pendingReports || 0}</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 bg-green-50 text-green-600 rounded-lg">
+                            <Shield size={24} />
+                        </div>
+                    </div>
+                    <h3 className="text-slate-500 text-sm font-medium">Total Reports</h3>
+                    <p className="text-3xl font-bold text-slate-900 mt-1">{stats?.reports || 0}</p>
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-2">
-                {tabs.map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${activeTab === tab.id
-                                ? 'bg-blue-600 text-white shadow-lg'
-                                : 'bg-white/50 text-slate-600 hover:bg-white'
-                            }`}
-                    >
-                        <tab.icon size={18} />
-                        {tab.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* Content */}
-            {loading ? (
-                <div className="flex justify-center items-center h-32">
-                    <Loader2 className="animate-spin text-blue-500" size={32} />
+            <div className="space-y-6">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center">
+                        <Compass className="text-white" size={18} />
+                    </div>
+                    <div>
+                        <h1 className="text-lg font-bold text-slate-100">Explore & Trending</h1>
+                        <p className="text-xs text-slate-300">Monitor trending content across the platform</p>
+                    </div>
                 </div>
-            ) : (
-                <>
-                    {/* Overview Tab */}
-                    {activeTab === 'overview' && stats && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="glass-card p-6 rounded-2xl flex items-center gap-4">
-                                <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
-                                    <Users size={24} />
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold text-slate-800">{stats.userCount}</div>
-                                    <div className="text-sm text-slate-500">Total Users</div>
-                                </div>
-                            </div>
-                            <div className="glass-card p-6 rounded-2xl flex items-center gap-4">
-                                <div className="p-3 bg-emerald-100 text-emerald-600 rounded-xl">
-                                    <FileText size={24} />
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold text-slate-800">{stats.postCount}</div>
-                                    <div className="text-sm text-slate-500">Total Posts</div>
-                                </div>
-                            </div>
-                            <div className="glass-card p-6 rounded-2xl flex items-center gap-4">
-                                <div className="p-3 bg-red-100 text-red-600 rounded-xl">
-                                    <AlertTriangle size={24} />
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold text-slate-800">{stats.pendingReports}</div>
-                                    <div className="text-sm text-slate-500">Pending Reports</div>
-                                </div>
-                            </div>
 
-                            {/* Role breakdown */}
-                            <div className="glass-card p-6 rounded-2xl md:col-span-3">
-                                <h3 className="font-bold text-slate-700 mb-4">Users by Role</h3>
-                                <div className="flex gap-6">
-                                    {stats.roleStats?.map(role => (
-                                        <div key={role._id} className="text-center">
-                                            <div className={`text-xl font-bold ${role._id === 'Admin' ? 'text-purple-600' :
-                                                    role._id === 'Faculty' ? 'text-amber-600' : 'text-green-600'
-                                                }`}>
-                                                {role.count}
-                                            </div>
-                                            <div className="text-sm text-slate-500">{role._id || 'Unknown'}</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                {/* Search Input */}
+                <div className="relative max-w-2xl">
+                    <div className="bg-white border border-slate-200 rounded-xl flex items-center gap-3 px-4 py-3">
+                        <Search className="text-slate-400" size={18} />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search for users..."
+                            className="flex-1 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none bg-transparent"
+                        />
+                        {searching && <Loader2 className="animate-spin text-slate-400" size={16} />}
+                    </div>
 
-                    {/* Users Tab */}
-                    {activeTab === 'users' && (
-                        <div className="glass-card rounded-3xl overflow-hidden border border-slate-100">
-                            <div className="p-6 border-b border-slate-100">
-                                <h2 className="text-lg font-bold text-slate-800">User Management ({users.length})</h2>
-                            </div>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left">
-                                    <thead className="bg-slate-50 text-slate-500 text-sm uppercase tracking-wider">
-                                        <tr>
-                                            <th className="p-4 font-semibold">User</th>
-                                            <th className="p-4 font-semibold">Role</th>
-                                            <th className="p-4 font-semibold">Joined</th>
-                                            <th className="p-4 font-semibold text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {users.map(u => (
-                                            <tr key={u._id} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="p-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-500">
-                                                            {u.username?.[0]?.toUpperCase() || '?'}
-                                                        </div>
-                                                        <div>
-                                                            <div className="font-medium text-slate-800">{u.username}</div>
-                                                            <div className="text-xs text-slate-400">{u.email}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${u.role === 'Admin' ? 'bg-purple-100 text-purple-600' :
-                                                            u.role === 'Faculty' ? 'bg-amber-100 text-amber-600' :
-                                                                'bg-green-100 text-green-600'
-                                                        }`}>
-                                                        {u.role}
-                                                    </span>
-                                                </td>
-                                                <td className="p-4 text-sm text-slate-500">
-                                                    {new Date(u.createdAt).toLocaleDateString()}
-                                                </td>
-                                                <td className="p-4 text-right">
-                                                    {u.role !== 'Admin' && (
-                                                        <button
-                                                            onClick={() => handleDeleteUser(u._id)}
-                                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                            title="Delete User"
-                                                        >
-                                                            <Trash2 size={18} />
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Reports Tab */}
-                    {activeTab === 'reports' && (
-                        <div className="space-y-4">
-                            {reports.length === 0 ? (
-                                <div className="glass-card rounded-2xl p-8 text-center">
-                                    <CheckCircle className="text-emerald-500 mx-auto mb-2" size={32} />
-                                    <p className="text-slate-500">No reports to review</p>
-                                </div>
-                            ) : (
-                                reports.map(report => (
-                                    <div key={report._id} className={`glass-card rounded-2xl p-6 border-l-4 ${report.status === 'pending' ? 'border-l-amber-500' :
-                                            report.status === 'resolved' ? 'border-l-emerald-500' : 'border-l-slate-300'
-                                        }`}>
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div>
-                                                <span className={`text-xs font-bold px-2 py-1 rounded-full ${report.status === 'pending' ? 'bg-amber-100 text-amber-600' :
-                                                        report.status === 'resolved' ? 'bg-emerald-100 text-emerald-600' :
-                                                            'bg-slate-100 text-slate-600'
-                                                    }`}>
-                                                    {report.status}
-                                                </span>
-                                                <span className="ml-2 text-sm text-slate-500">
-                                                    {new Date(report.createdAt).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                            {report.status === 'pending' && (
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => handleUpdateReport(report._id, 'resolved')}
-                                                        className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors"
-                                                        title="Mark as Resolved"
-                                                    >
-                                                        <CheckCircle size={18} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleUpdateReport(report._id, 'dismissed')}
-                                                        className="p-2 text-slate-400 hover:bg-slate-50 rounded-lg transition-colors"
-                                                        title="Dismiss"
-                                                    >
-                                                        <XCircle size={18} />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <p className="text-slate-700 mb-2">
-                                            <span className="font-bold">{report.reporter?.username || 'Unknown'}</span>
-                                            {' '}reported a <span className="font-medium">{report.type}</span> for <span className="text-red-500 font-medium">{report.reason}</span>
-                                        </p>
-
-                                        {report.reportedUser && (
-                                            <p className="text-sm text-slate-500">
-                                                Reported user: <span className="font-medium">{report.reportedUser.username}</span>
-                                            </p>
+                    {/* Search Dropdown */}
+                    {searchResults.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-10 overflow-hidden">
+                            {searchResults.map(user => (
+                                <a
+                                    key={user._id}
+                                    href={`/user/${user._id}`}
+                                    className="flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors"
+                                >
+                                    <div className="w-8 h-8 bg-slate-200 rounded-full overflow-hidden">
+                                        {user.profilePicture && (
+                                            <img src={user.profilePicture} alt={user.username} className="w-full h-full object-cover" />
                                         )}
                                     </div>
-                                ))
-                            )}
-                        </div>
-                    )}
-
-                    {/* Posts Tab */}
-                    {activeTab === 'posts' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {posts.map(post => (
-                                <div key={post._id} className="glass-card rounded-2xl p-4">
-                                    <div className="flex items-start gap-4">
-                                        <img
-                                            src={`http://localhost:5001${post.imageUrl}`}
-                                            alt="Post"
-                                            className="w-20 h-20 object-cover rounded-xl"
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-bold text-slate-800 truncate">
-                                                {post.author?.username || 'Unknown'}
-                                            </p>
-                                            <p className="text-sm text-slate-500 truncate">{post.caption}</p>
-                                            <p className="text-xs text-slate-400 mt-1">
-                                                {post.likes?.length || 0} likes • {post.comments?.length || 0} comments
-                                            </p>
-                                        </div>
-                                        <button
-                                            onClick={() => handleDeletePost(post._id)}
-                                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                            title="Delete Post"
-                                        >
-                                            <Trash2 size={18} />
-                                        </button>
+                                    <div>
+                                        <p className="text-sm font-semibold text-slate-900">{user.username}</p>
+                                        <p className="text-xs text-slate-500">{user.fullName}</p>
                                     </div>
-                                </div>
+                                </a>
                             ))}
                         </div>
                     )}
-                </>
-            )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {posts.map(post => (
+                        <PostCard key={post._id} post={post} />
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };
 
 export default AdminDashboard;
-

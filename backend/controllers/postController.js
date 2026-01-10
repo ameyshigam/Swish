@@ -41,8 +41,24 @@ const getPosts = async (req, res) => {
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
 
-        const posts = await Post.findAllPaginated(skip, limit);
-        const total = await Post.getCount();
+        // Get current user to access following list
+        const user = await User.findById(req.user.id);
+        
+        // If user not found (rare case if auth passed), return empty or handle error
+        if (!user) {
+             return res.status(404).json({ message: 'User not found' });
+        }
+
+        const followingIds = user.following || [];
+        
+        // Ensure all IDs are ObjectIds
+        const formattedFollowingIds = followingIds
+            .filter(id => ObjectId.isValid(id))
+            .map(id => new ObjectId(id));
+
+        // Use findFeed instead of findAllPaginated
+        const posts = await Post.findFeed(formattedFollowingIds, req.user.id, skip, limit);
+        const total = await Post.getFeedCount(formattedFollowingIds, req.user.id);
 
         res.json({
             posts,
@@ -139,6 +155,17 @@ const addComment = async (req, res) => {
 
 const deletePost = async (req, res) => {
     try {
+        const post = await Post.collection().findOne({ _id: new ObjectId(req.params.id) });
+        
+        if (!post) {
+            return res.status(404).json({ message: 'Post not found' });
+        }
+
+        // Check if user is author or admin
+        if (post.authorId.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
         await Post.collection().deleteOne({ _id: new ObjectId(req.params.id) });
         res.json({ message: 'Post removed' });
     } catch (error) {

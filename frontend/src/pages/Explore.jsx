@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import PostCard from '../components/PostCard';
-import { Loader2, TrendingUp, Search, UserPlus, X, Compass, Sparkles, Users, ArrowRight } from 'lucide-react';
+import { Loader2, TrendingUp, Search, UserPlus, UserMinus, X, Compass, Sparkles, Users, ArrowRight, Clock } from 'lucide-react';
 
 const Explore = () => {
     const [posts, setPosts] = useState([]);
@@ -55,8 +55,17 @@ const Explore = () => {
 
     const handleFollow = async (userId) => {
         try {
-            await axios.put(`/users/${userId}/follow`);
-            setSuggestedUsers(prev => prev.filter(u => u._id !== userId));
+            const res = await axios.put(`/users/${userId}/follow`);
+            setSuggestedUsers(prev => prev.map(u => {
+                if (u._id === userId) {
+                    return {
+                        ...u,
+                        isFollowing: false, // Since we only support requests now for new follows
+                        hasRequested: res.data.status === 'requested'
+                    };
+                }
+                return u;
+            }));
         } catch (err) {
             console.error("Follow failed:", err);
         }
@@ -167,9 +176,27 @@ const Explore = () => {
                                 </Link>
                                 <button
                                     onClick={() => handleFollow(user._id)}
-                                    className="w-full py-1.5 text-[10px] font-semibold text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition-colors"
+                                    className={`w-full py-1.5 text-[10px] font-semibold rounded-lg transition-colors flex items-center justify-center gap-1 ${
+                                        user.isFollowing 
+                                            ? 'bg-slate-100 text-slate-700 hover:bg-red-50 hover:text-red-600'
+                                            : user.hasRequested
+                                                ? 'bg-slate-100 text-slate-500 cursor-default'
+                                                : 'bg-slate-900 text-white hover:bg-slate-800'
+                                    }`}
                                 >
-                                    Follow
+                                    {user.isFollowing ? (
+                                        <>
+                                            <UserMinus size={12} /> Unfollow
+                                        </>
+                                    ) : user.hasRequested ? (
+                                        <>
+                                            <Clock size={12} /> Requested
+                                        </>
+                                    ) : (
+                                        <>
+                                            <UserPlus size={12} /> Follow
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         ))}
