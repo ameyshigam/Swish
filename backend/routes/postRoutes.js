@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
+
 const {
     createPost,
     getPosts,
@@ -16,35 +15,11 @@ const {
 } = require('../controllers/postController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
-// Multer Config
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
+// Cloudinary Config
+const { upload } = require('../config/cloudinary');
 
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5000000 }, // 5MB limit
-    fileFilter: function (req, file, cb) {
-        checkFileType(file, cb);
-    }
-});
-
-function checkFileType(file, cb) {
-    const filetypes = /jpeg|jpg|png|gif|webp/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-
-    if (mimetype && extname) {
-        return cb(null, true);
-    } else {
-        cb('Error: Images Only!');
-    }
-}
+// Use Cloudinary upload middleware
+// Validates file types via Cloudinary config or additional middleware if needed
 
 // Static routes first
 router.post('/', protect, upload.single('image'), createPost);

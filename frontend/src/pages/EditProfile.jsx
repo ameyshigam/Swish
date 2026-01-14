@@ -24,7 +24,7 @@ const EditProfile = () => {
     const getMediaUrl = (path) => {
         if (!path) return null;
         if (path.startsWith('http')) return path;
-        return `http://localhost:5001${path.startsWith('/') ? '' : '/'}${path}`;
+        return `${import.meta.env.VITE_SERVER_URL || 'http://localhost:5001'}${path.startsWith('/') ? '' : '/'}${path}`;
     };
 
     useEffect(() => {

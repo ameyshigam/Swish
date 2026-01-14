@@ -77,6 +77,15 @@ app.use((req, res, next) => {
 
 app.use(errorHandler);
 
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+    app.get(/(.*)/, (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../frontend', 'dist', 'index.html'));
+    });
+}
+
 // Database Connection & Server Start
 const startServer = async () => {
     try {
@@ -91,4 +100,3 @@ const startServer = async () => {
 };
 
 startServer();
-

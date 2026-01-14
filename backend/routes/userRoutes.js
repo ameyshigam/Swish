@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
+
 const {
     getUserProfile,
     updateProfile,
@@ -17,30 +16,11 @@ const {
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 
-// Multer config for avatar uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, 'avatar-' + req.user.id + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
+// Cloudinary config
+const { upload } = require('../config/cloudinary');
 
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 2000000 }, // 2MB limit for avatars
-    fileFilter: function (req, file, cb) {
-        const filetypes = /jpeg|jpg|png|gif|webp/;
-        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = filetypes.test(file.mimetype);
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb('Error: Images Only!');
-        }
-    }
-});
+// Using Cloudinary upload middleware, file size limits and filters can be configured in cloudinary.js or here if using a custom wrapper, 
+// but for standard implementation, we import the pre-configured upload instance.
 
 // Search users - must be before /:id routes
 router.get('/search', protect, searchUsers);

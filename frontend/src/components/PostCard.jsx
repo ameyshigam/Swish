@@ -99,13 +99,13 @@ const PostCard = ({ post, compact = false }) => {
     const getImageUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('http') || url.startsWith('https')) return url;
-        
+
         // Normalize slashes for Windows compatibility
         const normalizedUrl = url.replace(/\\/g, '/');
         // Remove double slashes if any (e.g. //uploads)
         const cleanUrl = normalizedUrl.startsWith('/') ? normalizedUrl : `/${normalizedUrl}`;
-        
-        return `http://localhost:5001${cleanUrl}`;
+
+        return `${import.meta.env.VITE_SERVER_URL || 'http://localhost:5001'}${cleanUrl}`;
     };
 
     const [imgSrc, setImgSrc] = useState(getImageUrl(post.imageUrl));
@@ -189,7 +189,7 @@ const PostCard = ({ post, compact = false }) => {
                     <Link to={`/user/${authorId}`} className="flex items-center gap-2 mb-2 hover:opacity-80 transition-opacity">
                         <div className="w-7 h-7 rounded-full bg-black flex items-center justify-center overflow-hidden flex-shrink-0">
                             {post.author?.profileData?.avatarUrl ? (
-                                <img src={`http://localhost:5001${post.author.profileData.avatarUrl}`} alt="" className="w-full h-full object-cover" />
+                                <img src={getImageUrl(post.author.profileData.avatarUrl)} alt="" className="w-full h-full object-cover" />
                             ) : (
                                 <span className="text-slate-900 text-xs font-bold">{post.author?.username?.[0]?.toUpperCase() || 'U'}</span>
                             )}
@@ -204,7 +204,7 @@ const PostCard = ({ post, compact = false }) => {
                     <p className="text-xs text-slate-600 line-clamp-2 flex-1 mb-2">{post.caption}</p>
 
                     {/* Stats */}
-                        <div className="flex items-center gap-3 mt-auto pt-2 text-[10px] font-medium text-slate-500">
+                    <div className="flex items-center gap-3 mt-auto pt-2 text-[10px] font-medium text-slate-500">
                         <span>{likeCount} likes</span>
                         <span>{comments.length} comments</span>
                     </div>

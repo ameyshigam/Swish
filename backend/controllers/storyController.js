@@ -7,16 +7,16 @@ const createStory = async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: 'Please upload an image/video' });
         }
-        
-        const mediaUrl = `/uploads/${req.file.filename}`;
+
+        const mediaUrl = req.file.path;
         const type = req.file.mimetype.startsWith('video') ? 'video' : 'image';
-        
+
         await Story.create({
             userId: new ObjectId(req.user.id),
             mediaUrl,
             type,
         });
-        
+
         res.status(201).json({ message: 'Story created' });
     } catch (error) {
         console.error(error);
@@ -28,10 +28,10 @@ const getStories = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
         const followingIds = user.following || [];
-        
+
         // Include friends' stories and my own
         const idsToFetch = [...followingIds, new ObjectId(req.user.id)];
-        
+
         const stories = await Story.getFriendsStories(idsToFetch);
         res.json(stories);
     } catch (error) {

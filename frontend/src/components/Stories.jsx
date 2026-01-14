@@ -119,14 +119,14 @@ const Stories = () => {
 
         if (isVideo && videoRef.current) {
             // Let video events handle progress
-            return; 
+            return;
         }
 
         const startTime = Date.now();
         const interval = setInterval(() => {
             const elapsed = Date.now() - startTime;
             const newProgress = (elapsed / STORY_DURATION) * 100;
-            
+
             if (newProgress >= 100) {
                 clearInterval(interval);
                 nextStory();
@@ -152,10 +152,10 @@ const Stories = () => {
     const confirmDelete = async () => {
         if (!deleteConfirmation) return;
         const storyId = deleteConfirmation;
-        
+
         try {
             await axios.delete(`/stories/${storyId}`);
-            
+
             // If it's the last story in the group, close or move
             if (viewingStory.stories.length === 1) {
                 closeViewer();
@@ -179,7 +179,7 @@ const Stories = () => {
     };
 
     const cancelDelete = (e) => {
-        if(e) e.stopPropagation();
+        if (e) e.stopPropagation();
         setDeleteConfirmation(null);
     };
 
@@ -187,7 +187,7 @@ const Stories = () => {
     const getMediaUrl = (path) => {
         if (!path) return '';
         if (path.startsWith('http')) return path;
-        return `http://localhost:5001${path.startsWith('/') ? '' : '/'}${path}`;
+        return `${import.meta.env.VITE_SERVER_URL || 'http://localhost:5001'}${path.startsWith('/') ? '' : '/'}${path}`;
     };
 
     const currentStory = viewingStory?.stories[currentStoryIndex];
@@ -210,8 +210,8 @@ const Stories = () => {
 
                 {/* Story List */}
                 {stories.map((group) => (
-                    <div 
-                        key={group.user._id} 
+                    <div
+                        key={group.user._id}
                         className="flex flex-col items-center min-w-[64px] cursor-pointer flex-shrink-0"
                         onClick={() => {
                             setViewingStory(group);
@@ -221,9 +221,9 @@ const Stories = () => {
                     >
                         <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-yellow-400 to-fuchsia-600 flex-shrink-0">
                             {group.user.profileData?.avatarUrl ? (
-                                <img 
-                                    src={`http://localhost:5001${group.user.profileData.avatarUrl}`} 
-                                    alt={group.user.username} 
+                                <img
+                                    src={getMediaUrl(group.user.profileData.avatarUrl)}
+                                    alt={group.user.username}
                                     className="w-full h-full rounded-full object-cover border-2 border-[#03060a]"
                                 />
                             ) : (
@@ -232,17 +232,17 @@ const Stories = () => {
                                 </div>
                             )}
                         </div>
-                                <span className="text-xs mt-2 text-slate-500 font-medium truncate w-16 text-center">{group.user.username}</span>
+                        <span className="text-xs mt-2 text-slate-500 font-medium truncate w-16 text-center">{group.user.username}</span>
                     </div>
                 ))}
             </div>
 
             {/* Instagram-style Viewer Modal */}
             {viewingStory && currentStory && (
-                    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
                     {/* Close Button */}
-                    <button 
-                        onClick={closeViewer} 
+                    <button
+                        onClick={closeViewer}
                         className="absolute top-4 right-4 z-30 p-2 bg-black/60 text-white hover:bg-black/70 rounded-full"
                         aria-label="Close story viewer"
                     >
@@ -250,14 +250,14 @@ const Stories = () => {
                     </button>
 
                     {/* Navigation Buttons (Desktop) */}
-                    <button 
+                    <button
                         onClick={(e) => { e.stopPropagation(); prevStory(); }}
                         className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 text-slate-900 p-2 rounded-full shadow z-30"
                         aria-label="Previous story"
                     >
                         <ChevronLeft size={32} />
                     </button>
-                    <button 
+                    <button
                         onClick={(e) => { e.stopPropagation(); nextStory(); }}
                         className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 text-slate-900 p-2 rounded-full shadow z-30"
                         aria-label="Next story"
@@ -267,16 +267,16 @@ const Stories = () => {
 
                     {/* Story Container */}
                     <div className="relative w-full max-w-md h-full md:h-[90vh] md:rounded-xl overflow-hidden bg-white shadow-lg flex flex-col">
-                        
+
                         {/* Progress Bars */}
                         <div className="absolute top-0 left-0 right-0 z-20 p-2 flex gap-1">
                             {viewingStory.stories.map((story, idx) => (
                                 <div key={story._id} className="h-1 flex-1 bg-slate-200 rounded-full overflow-hidden">
-                                    <div 
+                                    <div
                                         className="h-full bg-slate-900 transition-all duration-100 ease-linear"
-                                        style={{ 
-                                            width: idx < currentStoryIndex ? '100%' : 
-                                                   idx === currentStoryIndex ? `${progress}%` : '0%' 
+                                        style={{
+                                            width: idx < currentStoryIndex ? '100%' :
+                                                idx === currentStoryIndex ? `${progress}%` : '0%'
                                         }}
                                     />
                                 </div>
@@ -287,8 +287,8 @@ const Stories = () => {
                         <div className="absolute top-4 left-0 right-0 z-20 px-4 pt-2 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 {viewingStory.user.profileData?.avatarUrl ? (
-                                    <img 
-                                        src={`http://localhost:5001${viewingStory.user.profileData.avatarUrl}`} 
+                                    <img
+                                        src={getMediaUrl(viewingStory.user.profileData.avatarUrl)}
                                         className="w-8 h-8 rounded-full border border-slate-200"
                                         alt={viewingStory.user.username}
                                     />
@@ -299,13 +299,13 @@ const Stories = () => {
                                 )}
                                 <span className="text-slate-900 font-semibold text-sm">{viewingStory.user.username}</span>
                                 <span className="text-slate-500 text-xs">
-                                    {new Date(currentStory.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                    {new Date(currentStory.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             </div>
-                            
+
                             {/* Delete Button for Owner */}
                             {user?.id === viewingStory.user._id && (
-                                <button 
+                                <button
                                     onClick={(e) => handleDeleteClick(e, currentStory._id)}
                                     className="p-2 text-slate-700 hover:text-red-500 hover:bg-slate-100 rounded-full transition-colors"
                                 >
@@ -316,7 +316,7 @@ const Stories = () => {
 
                         {/* Delete Confirmation Modal */}
                         {deleteConfirmation && (
-                                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                                 <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl max-w-sm w-full text-center space-y-4">
                                     <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
                                         <Trash2 size={24} />
@@ -328,13 +328,13 @@ const Stories = () => {
                                         </p>
                                     </div>
                                     <div className="flex gap-3 pt-2">
-                                        <button 
+                                        <button
                                             onClick={cancelDelete}
                                             className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-900 font-semibold rounded-xl hover:bg-slate-200 transition-colors"
                                         >
                                             Cancel
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={confirmDelete}
                                             className="flex-1 px-4 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-500/20"
                                         >
@@ -354,11 +354,11 @@ const Stories = () => {
                             else nextStory();
                         }}>
                             {currentStory.type === 'video' ? (
-                                <video 
+                                <video
                                     ref={videoRef}
-                                    src={getMediaUrl(currentStory.mediaUrl)} 
+                                    src={getMediaUrl(currentStory.mediaUrl)}
                                     className="w-full h-full object-contain"
-                                    autoPlay 
+                                    autoPlay
                                     playsInline
                                     onEnded={nextStory}
                                     onTimeUpdate={(e) => {
@@ -367,8 +367,8 @@ const Stories = () => {
                                     }}
                                 />
                             ) : (
-                                <img 
-                                    src={getMediaUrl(currentStory.mediaUrl)} 
+                                <img
+                                    src={getMediaUrl(currentStory.mediaUrl)}
                                     className="w-full h-full object-contain"
                                     alt="Story"
                                 />

@@ -22,7 +22,7 @@ const createPost = async (req, res) => {
         const newPost = {
             authorId: new ObjectId(req.user.id),
             caption: caption.trim(),
-            imageUrl: `/uploads/${req.file.filename}`,
+            imageUrl: req.file.path,
             likes: [],
             comments: []
         };
@@ -43,14 +43,14 @@ const getPosts = async (req, res) => {
 
         // Get current user to access following list
         const user = await User.findById(req.user.id);
-        
+
         // If user not found (rare case if auth passed), return empty or handle error
         if (!user) {
-             return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'User not found' });
         }
 
         const followingIds = user.following || [];
-        
+
         // Ensure all IDs are ObjectIds
         const formattedFollowingIds = followingIds
             .filter(id => ObjectId.isValid(id))
@@ -156,7 +156,7 @@ const addComment = async (req, res) => {
 const deletePost = async (req, res) => {
     try {
         const post = await Post.collection().findOne({ _id: new ObjectId(req.params.id) });
-        
+
         if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }

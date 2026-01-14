@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     // Configure axios base URL (match backend PORT)
-    axios.defaults.baseURL = 'http://localhost:5001/api';
+    axios.defaults.baseURL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
     // Setup Axios Interceptors
     useEffect(() => {

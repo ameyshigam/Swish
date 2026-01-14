@@ -73,7 +73,7 @@ const updateAvatar = async (req, res) => {
             return res.status(400).json({ message: 'Please upload an image' });
         }
 
-        const avatarUrl = `/uploads/${req.file.filename}`;
+        const avatarUrl = req.file.path;
         await User.updateAvatar(req.user.id, avatarUrl);
 
         res.json({ message: 'Avatar updated', avatarUrl });
@@ -102,7 +102,7 @@ const toggleFollow = async (req, res) => {
         } else if (result.status === 'already_requested_or_following') {
             return res.status(400).json({ message: 'Already requested or following' });
         }
-        
+
         res.json(result);
     } catch (error) {
         console.error(error);
@@ -113,22 +113,22 @@ const toggleFollow = async (req, res) => {
 const respondToFollowRequest = async (req, res) => {
     try {
         const { requesterId, action } = req.body; // action: 'accept' or 'reject'
-        
+
         if (action === 'accept') {
             await User.acceptFollowRequest(req.user.id, requesterId);
-            
+
             // Notify the requester that their request was accepted
             await Notification.createFollowAcceptNotification(req.user.id, requesterId);
-            
+
             // Update the original request notification for the current user
             await Notification.handleFollowRequestResponse(requesterId, req.user.id, 'accept');
-            
+
             res.json({ message: 'Request accepted', status: 'accepted' });
         } else if (action === 'reject') {
             await User.rejectFollowRequest(req.user.id, requesterId);
             // Remove the original request notification
             await Notification.handleFollowRequestResponse(requesterId, req.user.id, 'reject');
-            
+
             res.json({ message: 'Request rejected', status: 'rejected' });
         } else {
             res.status(400).json({ message: 'Invalid action' });

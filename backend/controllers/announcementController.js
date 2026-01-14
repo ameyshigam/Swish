@@ -15,7 +15,7 @@ const createAnnouncement = async (req, res) => {
                 return res.status(403).json({ message: 'Faculty can only add Exam Notifications or Latest Announcements' });
             }
         }
-        
+
         // Admin specific validation (optional, but good for structure)
         if (userRole === 'Admin' && category === 'Scholarship Section' && !targetSection) {
             // Requirement says "admin can sent scholarship notices in 4 diff section". 
@@ -27,7 +27,7 @@ const createAnnouncement = async (req, res) => {
         let filePath = null;
 
         if (req.file) {
-            const fileUrl = `/uploads/${req.file.filename}`;
+            const fileUrl = req.file.path;
             if (req.file.mimetype === 'application/pdf') {
                 filePath = fileUrl;
             } else {
@@ -49,7 +49,7 @@ const createAnnouncement = async (req, res) => {
         // Notify Students
         // Find all students
         const students = await User.findAllStudents();
-        
+
         // Create notifications for each student
         const notifications = students.map(student => ({
             type: 'announcement',

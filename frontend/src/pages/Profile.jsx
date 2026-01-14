@@ -13,6 +13,12 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('posts');
 
+    const getServerUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        return `${import.meta.env.VITE_SERVER_URL || 'http://localhost:5001'}${path}`;
+    };
+
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -66,7 +72,7 @@ const Profile = () => {
                                 <div className="w-28 h-28 rounded-3xl bg-white p-1.5 shadow-xl">
                                     {profile?.profileData?.avatarUrl ? (
                                         <img
-                                            src={`http://localhost:5001${profile.profileData.avatarUrl}`}
+                                            src={getServerUrl(profile.profileData.avatarUrl)}
                                             alt={user?.username}
                                             className="w-full h-full rounded-2xl object-cover"
                                         />

@@ -17,6 +17,12 @@ const UserProfile = () => {
     const [followLoading, setFollowLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('posts');
 
+    const getServerUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        return `${import.meta.env.VITE_SERVER_URL || 'http://localhost:5001'}${path}`;
+    };
+
     const isOwnProfile = !id || id === currentUser?.id;
     const userId = isOwnProfile ? currentUser?.id : id;
 
@@ -46,7 +52,7 @@ const UserProfile = () => {
         try {
             const res = await axios.put(`/users/${userId}/follow`);
             const status = res.data.status;
-            
+
             setProfile(prev => {
                 let newIsFollowing = prev.isFollowing;
                 let newHasRequested = prev.hasRequested;
@@ -60,9 +66,9 @@ const UserProfile = () => {
                     newIsFollowing = false;
                     newFollowerCount = Math.max(0, prev.followerCount - 1);
                 } else if (status === 'accepted') {
-                     newIsFollowing = true;
-                     newHasRequested = false;
-                     newFollowerCount = prev.followerCount + 1;
+                    newIsFollowing = true;
+                    newHasRequested = false;
+                    newFollowerCount = prev.followerCount + 1;
                 }
 
                 return {
@@ -126,7 +132,7 @@ const UserProfile = () => {
                                 <div className="w-28 h-28 rounded-3xl bg-white p-1.5 shadow-xl">
                                     {profile.profileData?.avatarUrl ? (
                                         <img
-                                            src={`http://localhost:5001${profile.profileData.avatarUrl}`}
+                                            src={getServerUrl(profile.profileData.avatarUrl)}
                                             alt={profile.username}
                                             className="w-full h-full rounded-2xl object-cover"
                                         />
@@ -154,12 +160,11 @@ const UserProfile = () => {
                                         <button
                                             onClick={handleFollow}
                                             disabled={followLoading || (profile.hasRequested && !profile.isFollowing)}
-                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors group ${
-                                                profile.isFollowing
-                                                ? 'bg-emerald-50 text-emerald-600 hover:bg-red-50 hover:text-red-600'
-                                                : profile.hasRequested
-                                                    ? 'bg-slate-100 text-slate-700'
-                                                    : 'bg-slate-900 text-white hover:bg-slate-800'
+                                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors group ${profile.isFollowing
+                                                    ? 'bg-emerald-50 text-emerald-600 hover:bg-red-50 hover:text-red-600'
+                                                    : profile.hasRequested
+                                                        ? 'bg-slate-100 text-slate-700'
+                                                        : 'bg-slate-900 text-white hover:bg-slate-800'
                                                 }`}
                                         >
                                             {followLoading ? (
