@@ -193,53 +193,56 @@ const Stories = () => {
     const currentStory = viewingStory?.stories[currentStoryIndex];
 
     return (
-        <div className="bg-transparent mb-6 overflow-x-auto">
+        <div className="glass-stories p-4 mb-6 overflow-x-auto">
             <div className="flex gap-4 pb-2">
                 {/* Add Story Button - Hidden file input handled by label */}
                 <div className="flex flex-col items-center min-w-[64px] flex-shrink-0">
-                    <label className="w-16 h-16 rounded-full border-2 border-dashed border-slate-600 flex items-center justify-center cursor-pointer hover:border-slate-500 transition-colors relative">
-                        <input type="file" className="hidden" onChange={handleUpload} accept="image/*,video/*" />
-                        {uploading ? (
-                            <div className="animate-spin w-4 h-4 border-2 border-slate-400 rounded-full border-t-transparent"></div>
-                        ) : (
-                            <Plus size={24} className="text-slate-400" />
-                        )}
+                    <label className="w-16 h-16 rounded-full bg-gradient-to-br from-primary via-purple-500 to-pink-500 p-[2px] cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-primary/25 relative group">
+                        <div className="w-full h-full rounded-full bg-card flex items-center justify-center group-hover:bg-transparent transition-colors">
+                            <input type="file" className="hidden" onChange={handleUpload} accept="image/*,video/*" />
+                            {uploading ? (
+                                <div className="animate-spin w-5 h-5 border-2 border-primary rounded-full border-t-transparent"></div>
+                            ) : (
+                                <Plus size={24} className="text-primary group-hover:text-white transition-colors" />
+                            )}
+                        </div>
+                        <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </label>
-                    <span className="text-xs mt-2 text-slate-400 font-medium text-center">Add Story</span>
+                    <span className="text-xs mt-2 text-foreground font-semibold text-center">Add Story</span>
                 </div>
 
                 {/* Story List */}
                 {stories.map((group) => (
                     <div
                         key={group.user._id}
-                        className="flex flex-col items-center min-w-[64px] cursor-pointer flex-shrink-0"
+                        className="flex flex-col items-center min-w-[64px] cursor-pointer flex-shrink-0 group"
                         onClick={() => {
                             setViewingStory(group);
                             setCurrentStoryIndex(0);
                             setProgress(0);
                         }}
                     >
-                        <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-tr from-yellow-400 to-fuchsia-600 flex-shrink-0">
+                        <div className="w-16 h-16 rounded-full p-0.5 bg-gradient-to-br from-primary via-purple-500 to-pink-500 flex-shrink-0 group-hover:scale-105 transition-transform shadow-lg shadow-primary/20">
                             {group.user.profileData?.avatarUrl ? (
                                 <img
                                     src={getMediaUrl(group.user.profileData.avatarUrl)}
                                     alt={group.user.username}
-                                    className="w-full h-full rounded-full object-cover border-2 border-[#03060a]"
+                                    className="w-full h-full rounded-full object-cover border-2 border-background"
                                 />
                             ) : (
-                                <div className="w-full h-full rounded-full bg-slate-200 border-2 border-slate-200 flex items-center justify-center text-slate-900 font-semibold text-sm">
+                                <div className="w-full h-full rounded-full bg-muted border-2 border-background flex items-center justify-center text-muted-foreground font-semibold text-sm">
                                     {group.user.username?.[0]?.toUpperCase() || 'U'}
                                 </div>
                             )}
                         </div>
-                        <span className="text-xs mt-2 text-slate-500 font-medium truncate w-16 text-center">{group.user.username}</span>
+                        <span className="text-xs mt-2 text-muted-foreground font-medium truncate w-16 text-center">{group.user.username}</span>
                     </div>
                 ))}
             </div>
 
             {/* Instagram-style Viewer Modal */}
             {viewingStory && currentStory && (
-                <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 bg-background/50 flex items-center justify-center">
                     {/* Close Button */}
                     <button
                         onClick={closeViewer}
@@ -252,28 +255,28 @@ const Stories = () => {
                     {/* Navigation Buttons (Desktop) */}
                     <button
                         onClick={(e) => { e.stopPropagation(); prevStory(); }}
-                        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 text-slate-900 p-2 rounded-full shadow z-30"
+                        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-background/90 text-foreground p-2 rounded-full shadow z-30"
                         aria-label="Previous story"
                     >
                         <ChevronLeft size={32} />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); nextStory(); }}
-                        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 text-slate-900 p-2 rounded-full shadow z-30"
+                        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-background/90 text-foreground p-2 rounded-full shadow z-30"
                         aria-label="Next story"
                     >
                         <ChevronRight size={32} />
                     </button>
 
                     {/* Story Container */}
-                    <div className="relative w-full max-w-md h-full md:h-[90vh] md:rounded-xl overflow-hidden bg-white shadow-lg flex flex-col">
+                    <div className="relative w-full max-w-md h-full md:h-[90vh] md:rounded-xl overflow-hidden bg-card shadow-lg flex flex-col">
 
                         {/* Progress Bars */}
                         <div className="absolute top-0 left-0 right-0 z-20 p-2 flex gap-1">
                             {viewingStory.stories.map((story, idx) => (
-                                <div key={story._id} className="h-1 flex-1 bg-slate-200 rounded-full overflow-hidden">
+                                <div key={story._id} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-slate-900 transition-all duration-100 ease-linear"
+                                        className="h-full bg-white transition-all duration-100 ease-linear"
                                         style={{
                                             width: idx < currentStoryIndex ? '100%' :
                                                 idx === currentStoryIndex ? `${progress}%` : '0%'
@@ -289,16 +292,16 @@ const Stories = () => {
                                 {viewingStory.user.profileData?.avatarUrl ? (
                                     <img
                                         src={getMediaUrl(viewingStory.user.profileData.avatarUrl)}
-                                        className="w-8 h-8 rounded-full border border-slate-200"
+                                        className="w-8 h-8 rounded-full border border-white/50"
                                         alt={viewingStory.user.username}
                                     />
                                 ) : (
-                                    <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-900 font-semibold text-xs">
+                                    <div className="w-8 h-8 rounded-full bg-white/20 border border-white/50 flex items-center justify-center text-white font-semibold text-xs">
                                         {viewingStory.user.username?.[0]?.toUpperCase() || 'U'}
                                     </div>
                                 )}
-                                <span className="text-slate-900 font-semibold text-sm">{viewingStory.user.username}</span>
-                                <span className="text-slate-500 text-xs">
+                                <span className="text-white font-semibold text-sm drop-shadow-md">{viewingStory.user.username}</span>
+                                <span className="text-white/80 text-xs drop-shadow-md">
                                     {new Date(currentStory.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                             </div>
@@ -307,7 +310,7 @@ const Stories = () => {
                             {user?.id === viewingStory.user._id && (
                                 <button
                                     onClick={(e) => handleDeleteClick(e, currentStory._id)}
-                                    className="p-2 text-slate-700 hover:text-red-500 hover:bg-slate-100 rounded-full transition-colors"
+                                    className="p-2 text-white/80 hover:text-red-500 hover:bg-white/10 rounded-full transition-colors"
                                 >
                                     <Trash2 size={18} />
                                 </button>
@@ -317,26 +320,26 @@ const Stories = () => {
                         {/* Delete Confirmation Modal */}
                         {deleteConfirmation && (
                             <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                                <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-xl max-w-sm w-full text-center space-y-4">
-                                    <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto">
+                                <div className="bg-popover border border-border p-6 rounded-2xl shadow-xl max-w-sm w-full text-center space-y-4">
+                                    <div className="w-12 h-12 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto">
                                         <Trash2 size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-slate-900">Delete Story?</h3>
-                                        <p className="text-sm text-slate-500 mt-1">
+                                        <h3 className="text-lg font-bold text-foreground">Delete Story?</h3>
+                                        <p className="text-sm text-muted-foreground mt-1">
                                             Are you sure you want to delete this story? This action cannot be undone.
                                         </p>
                                     </div>
                                     <div className="flex gap-3 pt-2">
                                         <button
                                             onClick={cancelDelete}
-                                            className="flex-1 px-4 py-2.5 bg-slate-100 text-slate-900 font-semibold rounded-xl hover:bg-slate-200 transition-colors"
+                                            className="flex-1 px-4 py-2.5 bg-muted text-foreground font-semibold rounded-xl hover:bg-muted/80 transition-colors"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             onClick={confirmDelete}
-                                            className="flex-1 px-4 py-2.5 bg-red-600 text-white font-semibold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-500/20"
+                                            className="flex-1 px-4 py-2.5 bg-destructive text-destructive-foreground font-semibold rounded-xl hover:bg-destructive/90 transition-colors shadow-lg shadow-destructive/20"
                                         >
                                             Delete
                                         </button>
@@ -346,7 +349,7 @@ const Stories = () => {
                         )}
 
                         {/* Media Display */}
-                        <div className="flex-1 relative flex items-center justify-center bg-slate-50" onClick={(e) => {
+                        <div className="flex-1 relative flex items-center justify-center bg-black" onClick={(e) => {
                             // Tap left/right for navigation
                             const width = e.currentTarget.clientWidth;
                             const x = e.nativeEvent.offsetX;

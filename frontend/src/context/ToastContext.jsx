@@ -14,24 +14,24 @@ const Toast = ({ toast, onRemove }) => {
     };
 
     const bgColors = {
-        success: 'bg-emerald-50 border-emerald-200',
-        error: 'bg-red-50 border-red-200',
-        warning: 'bg-amber-50 border-amber-200',
-        info: 'bg-blue-50 border-blue-200'
+        success: 'bg-emerald-500/10 border-emerald-500/20',
+        error: 'bg-red-500/10 border-red-500/20',
+        warning: 'bg-amber-500/10 border-amber-500/20',
+        info: 'bg-blue-500/10 border-blue-500/20'
     };
 
     return (
-        <div className={`flex items-start gap-3 p-4 rounded-xl border shadow-lg ${bgColors[toast.type]} animate-slide-in`}>
+        <div className={`flex items-start gap-3 p-4 rounded-xl border shadow-lg backdrop-blur-sm ${bgColors[toast.type]} animate-slide-in`}>
             {icons[toast.type]}
             <div className="flex-1">
                 {toast.title && (
-                    <p className="font-semibold text-slate-800">{toast.title}</p>
+                    <p className="font-semibold text-foreground">{toast.title}</p>
                 )}
-                <p className="text-sm text-slate-600">{toast.message}</p>
+                <p className="text-sm text-foreground/80">{toast.message}</p>
             </div>
             <button
                 onClick={() => onRemove(toast.id)}
-                className="text-slate-400 hover:text-slate-600 transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
             >
                 <X size={16} />
             </button>

@@ -6,6 +6,7 @@ import SplashScreen from './components/SplashScreen';
 import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
 import Explore from './pages/Explore';
+import PostView from './pages/PostView';
 import CreatePost from './pages/CreatePost';
 import CreateStory from './pages/CreateStory';
 import Profile from './pages/Profile';
@@ -27,8 +28,8 @@ const PrivateRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-10 h-10 border-3 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-10 h-10 border-3 border-muted border-t-primary rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -41,8 +42,8 @@ const AdminRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="w-10 h-10 border-3 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-10 h-10 border-3 border-muted border-t-primary rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -81,6 +82,7 @@ function App() {
               <Route path="explore" element={<Explore />} />
               <Route path="create" element={<CreatePost />} />
               <Route path="create-story" element={<CreateStory />} />
+              <Route path="post/:id" element={<PostView />} />
               <Route path="profile" element={<Profile />} />
               <Route path="profile/edit" element={<EditProfile />} />
               <Route path="user/:id" element={<UserProfile />} />

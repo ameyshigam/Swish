@@ -9,6 +9,7 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const { connectDB } = require('./config/db');
 const { errorHandler } = require('./middleware/errorMiddleware');
+const hpp = require('hpp');
 
 const path = require('path');
 const fs = require('fs');
@@ -24,7 +25,12 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 app.use(express.json());
 
 // Security & Optmization Middleware
@@ -34,13 +40,16 @@ app.use(helmet({
 app.use(compression());
 app.use(morgan('dev'));
 
+// Prevent HTTP Parameter Pollution
+app.use(hpp());
+
 // Serve static files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rate Limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000 // limit each IP to 1000 requests per windowMs
+    max: 10000 // limit each IP to 10000 requests per windowMs (relaxed for dev)
 });
 app.use('/api', limiter);
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import axios from 'axios';
@@ -112,7 +112,7 @@ const EditProfile = () => {
             {/* Back Button */}
             <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors mb-6 group"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 group"
             >
                 <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
                 <span className="text-sm font-medium">Back to Profile</span>
@@ -122,10 +122,10 @@ const EditProfile = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Left Column - Avatar Panel */}
                 <div className="lg:col-span-4">
-                    <div className="bg-white border border-slate-200 rounded-3xl p-6 sticky top-6">
+                    <div className="neo-card p-6 sticky top-6">
                         {/* Avatar */}
                         <div className="relative group mb-6">
-                            <div className="w-32 h-32 mx-auto rounded-3xl overflow-hidden bg-slate-100 shadow-lg">
+                            <div className="w-32 h-32 mx-auto rounded-3xl overflow-hidden bg-muted shadow-lg">
                                 {avatarPreview ? (
                                     <img
                                         src={avatarPreview}
@@ -133,13 +133,13 @@ const EditProfile = () => {
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full bg-slate-900 flex items-center justify-center text-5xl font-bold text-white">
+                                    <div className="w-full h-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-5xl font-bold text-white">
                                         {user?.username?.[0]?.toUpperCase() || 'U'}
                                     </div>
                                 )}
                             </div>
                             <label className="absolute inset-0 flex items-center justify-center cursor-pointer">
-                                <div className="w-32 h-32 mx-auto rounded-3xl flex items-center justify-center bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <div className="w-32 h-32 mx-auto rounded-3xl flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Camera className="text-white" size={28} />
                                 </div>
                                 <input
@@ -152,34 +152,34 @@ const EditProfile = () => {
                         </div>
 
                         <div className="text-center mb-6">
-                            <h3 className="text-xl font-bold text-slate-900">{user?.username}</h3>
-                            <p className="text-sm text-slate-500">{user?.email}</p>
-                            <span className="inline-block mt-2 px-3 py-1 bg-slate-100 rounded-full text-xs font-semibold text-slate-600">
+                            <h3 className="text-xl font-bold text-foreground">{user?.username}</h3>
+                            <p className="text-sm text-muted-foreground">{user?.email}</p>
+                            <span className="inline-block mt-2 px-3 py-1 bg-muted rounded-full text-xs font-semibold text-muted-foreground">
                                 {user?.role}
                             </span>
                         </div>
 
                         {avatarFile && (
-                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2 text-sm text-emerald-700">
+                            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 flex items-center gap-2 text-sm text-emerald-500">
                                 <Sparkles size={16} />
                                 New photo selected
                             </div>
                         )}
 
                         {/* Tips */}
-                        <div className="mt-6 pt-6 border-t border-slate-100">
-                            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Tips</h4>
-                            <ul className="space-y-2 text-sm text-slate-600">
+                        <div className="mt-6 pt-6 border-t border-border">
+                            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tips</h4>
+                            <ul className="space-y-2 text-sm text-foreground/80">
                                 <li className="flex items-start gap-2">
-                                    <span className="w-1 h-1 rounded-full bg-slate-400 mt-2 flex-shrink-0"></span>
+                                    <span className="w-1 h-1 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></span>
                                     Use a clear profile photo
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="w-1 h-1 rounded-full bg-slate-400 mt-2 flex-shrink-0"></span>
+                                    <span className="w-1 h-1 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></span>
                                     Write a short, engaging bio
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <span className="w-1 h-1 rounded-full bg-slate-400 mt-2 flex-shrink-0"></span>
+                                    <span className="w-1 h-1 rounded-full bg-muted-foreground mt-2 flex-shrink-0"></span>
                                     Add your location for networking
                                 </li>
                             </ul>
@@ -189,30 +189,51 @@ const EditProfile = () => {
 
                 {/* Right Column - Form Panel */}
                 <div className="lg:col-span-8">
-                    <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden">
+                    <div className="neo-card overflow-hidden">
                         {/* Header */}
-                        <div className="p-6 border-b border-slate-100">
-                            <h2 className="text-2xl font-bold text-slate-900">Edit Profile</h2>
-                            <p className="text-slate-500 mt-1">Update your personal information</p>
+                        <div className="p-6 border-b border-border">
+                            <h2 className="text-2xl font-bold text-foreground">Edit Profile</h2>
+                            <p className="text-muted-foreground mt-1">Update your personal information</p>
                         </div>
 
                         {success && (
-                            <div className="mx-6 mt-6 bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-xl flex items-center gap-3">
+                            <div className="mx-6 mt-6 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 p-4 rounded-xl flex items-center gap-3">
                                 <CheckCircle size={20} />
                                 <span className="font-medium">Profile updated successfully!</span>
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                            {/* Bio */}
-                            <div className="bg-slate-50 rounded-2xl p-5">
+                            {/* Full Name */}
+                            <div className="bg-muted/50 rounded-2xl p-5">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500">
+                                    <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground">
+                                        <User size={18} />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-foreground">Full Name</label>
+                                        <span className="text-xs text-muted-foreground">Your full name</span>
+                                    </div>
+                                </div>
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={formData.fullName || ''}
+                                    onChange={handleChange}
+                                    placeholder="John Doe"
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all text-foreground placeholder:text-muted-foreground"
+                                />
+                            </div>
+
+                            {/* Bio */}
+                            <div className="bg-muted/50 rounded-2xl p-5">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground">
                                         <FileText size={18} />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-900">Bio</label>
-                                        <span className="text-xs text-slate-500">Tell others about yourself</span>
+                                        <label className="block text-sm font-semibold text-foreground">Bio</label>
+                                        <span className="text-xs text-muted-foreground">Tell others about yourself</span>
                                     </div>
                                 </div>
                                 <textarea
@@ -220,25 +241,25 @@ const EditProfile = () => {
                                     value={formData.bio}
                                     onChange={handleChange}
                                     placeholder="Write a short bio..."
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 focus:outline-none resize-none transition-all h-28 text-slate-700 placeholder:text-slate-400"
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none resize-none transition-all h-28 text-foreground placeholder:text-muted-foreground"
                                     maxLength={150}
                                 />
                                 <div className="flex justify-end mt-2">
-                                    <span className={`text-xs font-medium ${formData.bio.length > 140 ? 'text-amber-500' : 'text-slate-400'}`}>
+                                    <span className={`text-xs font-medium ${formData.bio.length > 140 ? 'text-amber-500' : 'text-muted-foreground'}`}>
                                         {formData.bio.length}/150
                                     </span>
                                 </div>
                             </div>
 
                             {/* Location */}
-                            <div className="bg-slate-50 rounded-2xl p-5">
+                            <div className="bg-muted/50 rounded-2xl p-5">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500">
+                                    <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground">
                                         <MapPin size={18} />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-900">Location</label>
-                                        <span className="text-xs text-slate-500">Where are you based?</span>
+                                        <label className="block text-sm font-semibold text-foreground">Location</label>
+                                        <span className="text-xs text-muted-foreground">Where are you based?</span>
                                     </div>
                                 </div>
                                 <input
@@ -247,19 +268,19 @@ const EditProfile = () => {
                                     value={formData.location}
                                     onChange={handleChange}
                                     placeholder="e.g., Engineering Building, Room 204"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 focus:outline-none transition-all text-slate-700 placeholder:text-slate-400"
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all text-foreground placeholder:text-muted-foreground"
                                 />
                             </div>
 
                             {/* Website */}
-                            <div className="bg-slate-50 rounded-2xl p-5">
+                            <div className="bg-muted/50 rounded-2xl p-5">
                                 <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500">
+                                    <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground">
                                         <LinkIcon size={18} />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-semibold text-slate-900">Website / Portfolio</label>
-                                        <span className="text-xs text-slate-500">Share your work or personal site</span>
+                                        <label className="block text-sm font-semibold text-foreground">Website / Portfolio</label>
+                                        <span className="text-xs text-muted-foreground">Share your work or personal site</span>
                                     </div>
                                 </div>
                                 <input
@@ -268,23 +289,22 @@ const EditProfile = () => {
                                     value={formData.website}
                                     onChange={handleChange}
                                     placeholder="https://yourportfolio.com"
-                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300 focus:outline-none transition-all text-slate-700 placeholder:text-slate-400"
+                                    className="w-full px-4 py-3 rounded-xl border border-border bg-card focus:ring-2 focus:ring-primary/20 focus:border-primary focus:outline-none transition-all text-foreground placeholder:text-muted-foreground"
                                 />
                             </div>
 
                             {/* Actions */}
                             <div className="flex gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => navigate(-1)}
-                                    className="flex-1 py-3.5 border border-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-colors"
+                                <Link
+                                    to="/profile"
+                                    className="flex-1 py-3.5 border border-border text-muted-foreground font-semibold rounded-xl hover:bg-accent/50 transition-colors text-center"
                                 >
                                     Cancel
-                                </button>
+                                </Link>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex-1 py-3.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                                    className="flex-1 py-3.5 bg-gradient-to-r from-primary to-purple-600 text-white font-semibold rounded-xl hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
                                 >
                                     {loading ? (
                                         <>

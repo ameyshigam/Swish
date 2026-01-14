@@ -7,10 +7,10 @@ const register = async (req, res) => {
     try {
         const { username, email, password, role } = req.body;
 
-        // Domain Constraint
-        if (!email.endsWith('@model.edu.in')) {
-            return res.status(400).json({ message: 'Registration restricted to @model.edu.in emails only' });
-        }
+        // Domain Constraint - DISABLED for development
+        // if (!email.endsWith('@model.edu.in')) {
+        //     return res.status(400).json({ message: 'Registration restricted to @model.edu.in emails only' });
+        // }
 
         // Check if user exists
         const existingUser = await User.findByEmail(email);
@@ -58,7 +58,8 @@ const register = async (req, res) => {
                 id: String(result.insertedId),
                 username: newUser.username,
                 email: newUser.email,
-                role: newUser.role
+                role: newUser.role,
+                profileData: newUser.profileData
             }
         });
     } catch (error) {
@@ -72,11 +73,10 @@ const login = async (req, res) => {
         const { email, password } = req.body;
 
         // Special Admin Login
-        if (email === '696969@admin.edu.in') {
-            if (password !== 'admin69') {
-                return res.status(400).json({ message: 'Invalid credentials' });
-            }
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@swish.com';
+        const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
+        if (email === adminEmail && adminPassword && password === adminPassword) {
             // Find or Create Admin
             let adminUser = await User.findByEmail(email);
             if (!adminUser) {
@@ -107,18 +107,19 @@ const login = async (req, res) => {
             return res.status(200).json({
                 token,
                 user: {
-                    id: String(adminUser._id),
-                    username: adminUser.username,
-                    email: adminUser.email,
-                    role: adminUser.role
+                    id: String(user._id),
+                    username: user.username,
+                    email: user.email,
+                    role: user.role,
+                    profileData: user.profileData
                 }
             });
         }
 
-        // Domain Constraint for Regular Users
-        if (!email.endsWith('@model.edu.in')) {
-            return res.status(403).json({ message: 'Access restricted to @model.edu.in emails' });
-        }
+        // Domain Constraint for Regular Users - DISABLED for development
+        // if (!email.endsWith('@model.edu.in')) {
+        //     return res.status(403).json({ message: 'Access restricted to @model.edu.in emails' });
+        // }
 
         // Check user
         const user = await User.findByEmail(email);
@@ -150,7 +151,8 @@ const login = async (req, res) => {
                 id: String(user._id),
                 username: user.username,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                profileData: user.profileData
             }
         });
     } catch (error) {
@@ -206,7 +208,7 @@ const getPublicStats = async (req, res) => {
         const postCount = await Post.collection().countDocuments();
         // Since we don't have a Community model yet, we'll use a placeholder or 0
         // Or we could count unique faculties/departments if we had that data structure
-        const communityCount = 0; 
+        const communityCount = 0;
 
         res.json({
             users: userCount,

@@ -6,6 +6,7 @@ const {
     getPosts,
     getUserPosts,
     getExplorePosts,
+    searchPosts,
     toggleLike,
     addComment,
     deletePost,
@@ -25,6 +26,7 @@ const { upload } = require('../config/cloudinary');
 router.post('/', protect, upload.single('image'), createPost);
 router.get('/', protect, getPosts);
 router.get('/explore', protect, getExplorePosts);
+router.get('/search', protect, searchPosts);
 router.get('/me', protect, getUserPosts);
 router.get('/bookmarks', protect, getBookmarkedPosts);
 

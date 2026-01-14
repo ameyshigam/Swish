@@ -16,95 +16,93 @@ class Post {
         return result;
     }
 
-    static async findAll() {
+    static async searchPosts(query, limit = 10) {
         return await this.collection().aggregate([
-            { $sort: { createdAt: -1 } },
             {
-                $lookup: {
-                    from: 'users',
-                    localField: 'authorId',
-                    foreignField: '_id',
-                    as: 'author'
+                $match: {
+                    caption: { $regex: query, $options: 'i' }
                 }
             },
-            {
-                $unwind: {
-                    path: '$author',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    'author.password': 0,
-                    'author.email': 0
-                }
-            }
+            { $limit: limit },
+            ...this.authorLookupStage()
         ]).toArray();
+    }
+
+    static async populateCommentAuthors(posts) {
+        if (!posts || posts.length === 0) return posts;
+
+        const allComments = posts.flatMap(p => p.comments || []);
+        if (allComments.length === 0) return posts;
+
+        const userIds = [...new Set(allComments.map(c => c.userId))].filter(id => id); // Filter nulls
+
+        if (userIds.length === 0) return posts;
+
+        const users = await getDB().collection('users')
+            .find({ _id: { $in: userIds } })
+            .project({ _id: 1, 'profileData.avatarUrl': 1, username: 1 })
+            .toArray();
+
+        const userMap = {};
+        users.forEach(u => {
+            userMap[u._id.toString()] = u;
+        });
+
+        posts.forEach(post => {
+            if (post.comments) {
+                post.comments.forEach(comment => {
+                    if (!comment.userAvatar && comment.userId) {
+                        const author = userMap[comment.userId.toString()];
+                        if (author) {
+                            comment.userAvatar = author.profileData?.avatarUrl || '';
+                            // Also ensure username is set if missing (optional fix)
+                            if (!comment.username) comment.username = author.username;
+                        }
+                    }
+                });
+            }
+        });
+
+        return posts;
+    }
+
+    static async findAll() {
+        const posts = await this.collection().aggregate([
+            { $sort: { createdAt: -1 } },
+            ...this.authorLookupStage()
+        ]).toArray();
+        return await this.populateCommentAuthors(posts);
     }
 
     static async findAllPaginated(skip = 0, limit = 10) {
-        return await this.collection().aggregate([
+        const posts = await this.collection().aggregate([
             { $sort: { createdAt: -1 } },
             { $skip: skip },
             { $limit: limit },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'authorId',
-                    foreignField: '_id',
-                    as: 'author'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$author',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    'author.password': 0,
-                    'author.email': 0
-                }
-            }
+            ...this.authorLookupStage()
         ]).toArray();
+        return await this.populateCommentAuthors(posts);
     }
 
     static async findFeed(followingIds, userId, skip = 0, limit = 10) {
-        // followingIds is an array of ObjectIds of people the user follows (and who accepted)
-        // We also want to see our own posts? Usually yes.
         const idsToFetch = [...followingIds, new ObjectId(userId)];
 
-        return await this.collection().aggregate([
-            { 
-                $match: { 
-                    authorId: { $in: idsToFetch } 
-                } 
+        const posts = await this.collection().aggregate([
+            {
+                $match: {
+                    authorId: { $in: idsToFetch }
+                }
             },
             { $sort: { createdAt: -1 } },
             { $skip: skip },
             { $limit: limit },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'authorId',
-                    foreignField: '_id',
-                    as: 'author'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$author',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    'author.password': 0,
-                    'author.email': 0
-                }
-            }
+            ...this.authorLookupStage()
         ]).toArray();
+        return await this.populateCommentAuthors(posts);
+    }
+
+    static async getCount() {
+        return await this.collection().countDocuments();
     }
 
     static async getFeedCount(followingIds, userId) {
@@ -114,64 +112,24 @@ class Post {
         });
     }
 
-    static async getCount() {
-        return await this.collection().countDocuments();
-    }
-
     static async findByAuthor(authorId) {
-        return await this.collection().aggregate([
+        const posts = await this.collection().aggregate([
             {
                 $match: { authorId: new ObjectId(authorId) }
             },
             { $sort: { createdAt: -1 } },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'authorId',
-                    foreignField: '_id',
-                    as: 'author'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$author',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    'author.password': 0,
-                    'author.email': 0
-                }
-            }
+            ...this.authorLookupStage()
         ]).toArray();
+        return await this.populateCommentAuthors(posts);
     }
 
     static async findExplore() {
-        return await this.collection().aggregate([
+        const posts = await this.collection().aggregate([
             { $sort: { likes: -1, createdAt: -1 } }, // Popular first
             { $limit: 20 },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'authorId',
-                    foreignField: '_id',
-                    as: 'author'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$author',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    'author.password': 0,
-                    'author.email': 0
-                }
-            }
+            ...this.authorLookupStage()
         ]).toArray();
+        return await this.populateCommentAuthors(posts);
     }
 
     static async like(postId, userId) {
@@ -196,11 +154,12 @@ class Post {
         }
     }
 
-    static async addComment(postId, userId, text, username) {
+    static async addComment(postId, userId, text, username, userAvatar) {
         const comment = {
             _id: new ObjectId(),
             userId: new ObjectId(userId),
             username,
+            userAvatar,
             text,
             createdAt: new Date()
         };
@@ -211,6 +170,50 @@ class Post {
         );
 
         return comment;
+    }
+
+    static async findByIdWithAuthor(id) {
+        const result = await this.collection().aggregate([
+            { $match: { _id: new ObjectId(id) } },
+            ...this.authorLookupStage()
+        ]).toArray();
+        const populated = await this.populateCommentAuthors(result);
+        return populated[0];
+    }
+
+    static async findBookmarksWithAuthor(bookmarkIds) {
+        const posts = await this.collection().aggregate([
+            { $match: { _id: { $in: bookmarkIds } } },
+            ...this.authorLookupStage(),
+            { $sort: { createdAt: -1 } }
+        ]).toArray();
+        return await this.populateCommentAuthors(posts);
+    }
+
+    // Helper for common aggregation stages
+    static authorLookupStage() {
+        return [
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'authorId',
+                    foreignField: '_id',
+                    as: 'author'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$author',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    'author.password': 0,
+                    'author.email': 0
+                }
+            }
+        ];
     }
 }
 

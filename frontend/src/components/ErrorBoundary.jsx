@@ -18,12 +18,12 @@ class ErrorBoundary extends Component {
     render() {
         if (this.state.hasError) {
             return (
-                <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                    <div className="p-8 bg-white rounded-lg shadow-md text-center">
-                        <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong.</h1>
-                        <p className="text-gray-700 mb-4">We're sorry, but an unexpected error has occurred.</p>
+                <div className="flex items-center justify-center min-h-screen bg-background">
+                    <div className="p-8 bg-card rounded-lg shadow-md border border-border text-center max-w-2xl">
+                        <h2 className="text-2xl font-bold text-destructive mb-4">Something went wrong</h2>
+                        <p className="text-foreground mb-4">We're sorry, but an unexpected error has occurred.</p>
                         {this.state.error && (
-                            <pre className="text-left bg-gray-200 p-4 rounded overflow-auto text-sm mb-4 max-w-lg">
+                            <pre className="text-left bg-muted p-4 rounded overflow-auto text-sm mb-4 max-w-full text-foreground">
                                 {this.state.error.toString()}
                                 <br />
                                 {this.state.errorInfo?.componentStack}
@@ -31,7 +31,7 @@ class ErrorBoundary extends Component {
                         )}
                         <button
                             onClick={() => window.location.reload()}
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none"
+                            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 focus:outline-none"
                         >
                             Reload Page
                         </button>

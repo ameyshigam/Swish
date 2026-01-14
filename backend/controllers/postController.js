@@ -96,6 +96,21 @@ const getExplorePosts = async (req, res) => {
     }
 };
 
+const searchPosts = async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q || q.length < 2) {
+            return res.json([]);
+        }
+
+        const posts = await Post.searchPosts(q);
+        res.json(posts);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 const toggleLike = async (req, res) => {
     try {
         const postId = req.params.id;
@@ -133,7 +148,20 @@ const addComment = async (req, res) => {
             return res.status(400).json({ message: 'Comment must be less than 280 characters' });
         }
 
-        const comment = await Post.addComment(postId, req.user.id, text.trim(), req.user.username);
+        let username = req.user.username;
+        let userAvatar = req.user.profileData?.avatarUrl || '';
+
+        if (!username) {
+            const user = await User.findById(req.user.id);
+            if (user) {
+                username = user.username;
+                userAvatar = user.profileData?.avatarUrl || '';
+            } else {
+                return res.status(404).json({ message: 'User not found' });
+            }
+        }
+
+        const comment = await Post.addComment(postId, req.user.id, text.trim(), username, userAvatar);
 
         // Send notification to post author
         const post = await Post.collection().findOne({ _id: new ObjectId(postId) });
@@ -176,35 +204,13 @@ const deletePost = async (req, res) => {
 
 const getPostById = async (req, res) => {
     try {
-        const post = await Post.collection().aggregate([
-            { $match: { _id: new ObjectId(req.params.id) } },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'authorId',
-                    foreignField: '_id',
-                    as: 'author'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$author',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    'author.password': 0,
-                    'author.email': 0
-                }
-            }
-        ]).toArray();
+        const post = await Post.findByIdWithAuthor(req.params.id);
 
-        if (!post || post.length === 0) {
+        if (!post) {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        res.json(post[0]);
+        res.json(post);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server Error' });
@@ -232,31 +238,7 @@ const getBookmarkedPosts = async (req, res) => {
             return res.json([]);
         }
 
-        const posts = await Post.collection().aggregate([
-            { $match: { _id: { $in: bookmarks } } },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'authorId',
-                    foreignField: '_id',
-                    as: 'author'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$author',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    'author.password': 0,
-                    'author.email': 0
-                }
-            },
-            { $sort: { createdAt: -1 } }
-        ]).toArray();
-
+        const posts = await Post.findBookmarksWithAuthor(bookmarks);
         res.json(posts);
     } catch (error) {
         console.error(error);
@@ -274,5 +256,6 @@ module.exports = {
     deletePost,
     getPostById,
     toggleBookmark,
-    getBookmarkedPosts
+    getBookmarkedPosts,
+    searchPosts
 };

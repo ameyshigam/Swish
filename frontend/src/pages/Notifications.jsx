@@ -5,12 +5,12 @@ import { Bell, Heart, MessageCircle, UserPlus, Check, Loader2 } from 'lucide-rea
 
 const NotificationIcon = ({ type }) => {
     const styles = {
-        like: 'bg-red-100 text-red-600',
-        comment: 'bg-blue-100 text-blue-600',
-        follow: 'bg-emerald-100 text-emerald-600',
-        follow_request: 'bg-purple-100 text-purple-600',
-        follow_accept: 'bg-emerald-100 text-emerald-600',
-        default: 'bg-slate-100 text-slate-600'
+        like: 'bg-red-500/10 text-red-500',
+        comment: 'bg-blue-500/10 text-blue-500',
+        follow: 'bg-emerald-500/10 text-emerald-500',
+        follow_request: 'bg-purple-500/10 text-purple-500',
+        follow_accept: 'bg-emerald-500/10 text-emerald-500',
+        default: 'bg-muted text-muted-foreground'
     };
 
     const icons = {
@@ -40,7 +40,7 @@ const Notifications = () => {
                 // 1. Fetch notifications
                 const res = await axios.get('/notifications');
                 setNotifications(res.data);
-                
+
                 // 2. Mark all as read automatically if there are unread items
                 const hasUnread = res.data.some(n => !n.read);
                 if (hasUnread) {
@@ -121,11 +121,11 @@ const Notifications = () => {
                 requesterId: notification.sender._id,
                 action: 'accept'
             });
-            
+
             // Update UI to show "We are friends now"
-            setNotifications(prev => prev.map(n => 
-                n._id === notification._id 
-                    ? { ...n, read: true, type: 'follow_accept', message: 'is now your friend!' } 
+            setNotifications(prev => prev.map(n =>
+                n._id === notification._id
+                    ? { ...n, read: true, type: 'follow_accept', message: 'is now your friend!' }
                     : n
             ));
         } catch (error) {
@@ -141,7 +141,7 @@ const Notifications = () => {
                 requesterId: notification.sender._id,
                 action: 'reject'
             });
-             setNotifications(prev => prev.filter(n => n._id !== notification._id));
+            setNotifications(prev => prev.filter(n => n._id !== notification._id));
         } catch (error) {
             console.error("Failed to reject", error);
         }
@@ -150,7 +150,7 @@ const Notifications = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <Loader2 className="animate-spin text-slate-400" size={32} />
+                <Loader2 className="animate-spin text-primary" size={32} />
             </div>
         );
     }
@@ -158,60 +158,56 @@ const Notifications = () => {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-2xl mx-auto space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
-                            <Bell className="text-slate-700" size={20} />
+            <div className="neo-card p-6 relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-full blur-2xl"></div>
+                <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl flex items-center justify-center shadow-lg shadow-pink-500/30">
+                            <Bell className="text-white" size={24} />
                         </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-white">Notifications</h2>
-                        {unreadCount > 0 && (
-                            <p className="text-slate-500 dark:text-slate-400 text-sm">{unreadCount} unread</p>
-                        )}
+                        <div>
+                            <h1 className="text-xl font-bold text-foreground">Notifications</h1>
+                            <p className="text-muted-foreground text-sm">{notifications.length} notifications</p>
+                        </div>
                     </div>
+                    {unreadCount > 0 && (
+                        <button
+                            onClick={markAllAsRead}
+                            disabled={markingAll}
+                            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-accent/50 rounded-xl transition-colors"
+                        >
+                            {markingAll ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
+                            Mark all read
+                        </button>
+                    )}
                 </div>
-
-                {unreadCount > 0 && (
-                    <button
-                        onClick={markAllAsRead}
-                        disabled={markingAll}
-                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                    >
-                        {markingAll ? (
-                            <Loader2 className="animate-spin" size={16} />
-                        ) : (
-                            <Check size={16} />
-                        )}
-                        Mark all read
-                    </button>
-                )}
             </div>
 
             {/* Notifications List */}
             {notifications.length === 0 ? (
-                <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
-                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <Bell className="text-slate-400" size={28} />
+                <div className="neo-card p-8 text-center">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <Bell className="text-primary" size={28} />
                     </div>
-                    <p className="text-slate-600 font-medium mb-1">No notifications yet</p>
-                    <p className="text-slate-400 text-sm">
+                    <p className="text-foreground font-medium mb-1">No notifications yet</p>
+                    <p className="text-muted-foreground text-sm">
                         When someone interacts with your posts, you'll see it here
                     </p>
                 </div>
             ) : (
-                <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
+                <div className="neo-card overflow-hidden divide-y divide-border mt-4">
                     {notifications.map(notification => (
                         <Link
                             key={notification._id}
                             to={getNotificationLink(notification)}
                             onClick={() => !notification.read && markAsRead(notification._id)}
-                            className={`flex items-start gap-4 p-4 transition-colors hover:bg-slate-50 ${!notification.read ? 'bg-slate-50' : ''
+                            className={`flex items-start gap-4 p-4 transition-colors hover:bg-accent/50 ${!notification.read ? 'bg-primary/5' : ''
                                 }`}
                         >
                             {/* Sender Avatar */}
-                            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-900 font-semibold text-sm flex-shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground font-semibold text-sm flex-shrink-0">
                                 {notification.sender?.username?.[0]?.toUpperCase() || '?'}
                             </div>
 
@@ -219,40 +215,40 @@ const Notifications = () => {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
                                     <NotificationIcon type={notification.type} />
-                                    <p className="text-slate-700 text-sm">
-                                        <span className="font-semibold text-slate-900">{notification.sender?.username}</span>
+                                    <p className="text-foreground/80 text-sm">
+                                        <span className="font-semibold text-foreground">{notification.sender?.username}</span>
                                         {' '}{notification.message}
                                     </p>
                                 </div>
                                 {notification.preview && (
-                                    <p className="text-slate-500 text-sm truncate pl-10">
+                                    <p className="text-muted-foreground text-sm truncate pl-10">
                                         "{notification.preview}"
                                     </p>
                                 )}
                                 {notification.type === 'follow_request' && (
                                     <div className="flex gap-2 pl-10 mt-2">
-                                        <button 
+                                        <button
                                             onClick={(e) => handleAccept(e, notification)}
-                                            className="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded-lg hover:bg-emerald-700"
+                                            className="px-3 py-1 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600"
                                         >
                                             Confirm
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={(e) => handleReject(e, notification)}
-                                            className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg hover:bg-slate-200"
+                                            className="px-3 py-1 bg-muted text-muted-foreground text-xs font-semibold rounded-lg hover:bg-accent"
                                         >
                                             Delete
                                         </button>
                                     </div>
                                 )}
-                                <p className="text-xs text-slate-400 mt-1 pl-10">
+                                <p className="text-xs text-muted-foreground mt-1 pl-10">
                                     {formatTime(notification.createdAt)}
                                 </p>
                             </div>
 
                             {/* Unread Indicator */}
                             {!notification.read && (
-                                <div className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 mt-2"></div>
+                                <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-2"></div>
                             )}
                         </Link>
                     ))}
@@ -263,4 +259,3 @@ const Notifications = () => {
 };
 
 export default Notifications;
-

@@ -1,0 +1,624 @@
+@import "tailwindcss";
+
+/* Neo-Minimal Design System */
+
+:root {
+  --color-primary: 59 130 246;
+  /* Blue */
+  --color-accent: 139 92 246;
+  /* Purple */
+  --color-surface: 255 255 255;
+  /* White */
+  --color-background: 248 250 252;
+  /* Slate 50 */
+  --color-text: 15 23 42;
+  /* Slate 900 */
+  --color-text-secondary: 100 116 139;
+  /* Slate 500 */
+  --color-border: 226 232 240;
+  /* Slate 200 */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 8px 24px rgb(0 0 0 / 0.08);
+  --shadow-xl: 0 16px 48px rgb(0 0 0 / 0.1);
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+}
+
+@layer base {
+  * {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-white text-slate-900 transition-colors duration-300;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  /* Dark mode variables */
+  .dark {
+    --color-surface: 8 12 18;
+    --color-background: 4 6 11;
+    --color-text: 245 247 250;
+    --color-text-secondary: 148 163 184;
+    --color-border: 28 33 39;
+  }
+
+  .dark body {
+    background-color: #03060a;
+    /* deep uniform dark */
+    color: rgb(var(--color-text));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Stronger global contrasts for dark mode */
+  .dark h1,
+  .dark h2,
+  .dark h3,
+  .dark h4,
+  .dark h5,
+  .dark h6 {
+    color: rgb(var(--color-text));
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .dark p,
+  .dark span,
+  .dark label,
+  .dark a,
+  .dark small,
+  .dark button {
+    color: rgb(var(--color-text));
+  }
+
+  /* Generic sidebar/header surfaces */
+  .dark aside,
+  .dark header,
+  .dark nav,
+  .dark .sidebar {
+    background: #03060a;
+    /* strong black sidebar */
+    border-right: 1px solid rgba(255, 255, 255, 0.03);
+    color: rgb(var(--color-text));
+  }
+
+  /* Override common light utility backgrounds used through the templates */
+  /* Global overrides removed to allow explicit dark: classes to work */
+
+  /* Accent gradient utilities */
+  .accent-gradient {
+    background: linear-gradient(90deg, rgba(124, 58, 237, 0.95), rgba(6, 182, 212, 0.95));
+    color: white;
+    box-shadow: 0 10px 30px rgba(6, 11, 26, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .accent-outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgb(var(--color-text));
+  }
+
+  /* Improve input contrast / placeholders */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background: rgba(255, 255, 255, 0.02) !important;
+    color: rgb(var(--color-text)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  }
+
+  .dark ::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  /* Buttons and interactive elements */
+  .dark .neo-button-primary {
+    background: linear-gradient(90deg, #7c3aed, #06b6d4) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 8px 30px rgba(2, 6, 23, 0.6) !important;
+  }
+
+  .dark .neo-button-secondary {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01)) !important;
+    color: rgb(var(--color-text)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  }
+
+  /* Ensure text on badges and small UI remains readable */
+  .dark .neo-badge,
+  .dark .neo-badge-primary,
+  .dark .neo-badge-secondary {
+    color: #e6eef9 !important;
+  }
+
+  /* Make cards pop with soft rounded surfaces */
+  .dark .card,
+  .dark .neo-card,
+  .dark .glass-card {
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #0b1720;
+    color: rgb(var(--color-text));
+  }
+
+  /* Ensure main content area uses the same dark surface and no light gutters */
+  .dark main,
+  .dark .max-w-6xl,
+  .dark .container,
+  .dark .content {
+    background: transparent !important;
+    color: rgb(var(--color-text)) !important;
+  }
+}
+
+@layer utilities {
+
+  /* Neo-Minimal Card */
+  .neo-card {
+    @apply bg-white border border-slate-100 shadow-sm transition-all duration-300;
+    border-radius: var(--radius-xl);
+  }
+
+  .neo-card:hover {
+    @apply shadow-md border-slate-200;
+  }
+
+  .dark .neo-card {
+    background-color: #0b1720;
+    /* solid dark card */
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    box-shadow: none;
+    color: rgb(var(--color-text));
+  }
+
+  /* Glass Effect (minimal version) */
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-slate-100/50;
+    box-shadow: var(--shadow-md);
+  }
+
+  .dark .glass {
+    background-color: #0b1720;
+    /* treat glass same as card but solid */
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    box-shadow: none;
+  }
+
+  .glass-card {
+    @apply bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-300;
+    border-radius: var(--radius-xl);
+  }
+
+  .dark .glass-card {
+    background-color: #0b1720;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    box-shadow: none;
+    color: rgb(var(--color-text));
+  }
+
+  /* Ensure accidental dark-text utilities are readable in dark mode */
+  .dark .text-slate-900,
+  .dark .text-slate-800 {
+    color: rgb(var(--color-text)) !important;
+  }
+
+  /* Primary button: solid accent for readability */
+  .dark .neo-button-primary {
+    background: linear-gradient(90deg, #7c3aed, #06b6d4) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 6px 18px rgba(3, 6, 23, 0.6) !important;
+  }
+
+  /* Neo Button */
+  .neo-button {
+    @apply inline-flex items-center justify-center font-semibold transition-all duration-200;
+    border-radius: var(--radius-md);
+  }
+
+  .neo-button-primary {
+    @apply bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.98];
+  }
+
+  .neo-button-secondary {
+    @apply bg-slate-100 text-slate-700 hover:bg-slate-200 active:scale-[0.98];
+  }
+
+  .dark .neo-button-primary {
+    @apply bg-white text-slate-900 hover:bg-slate-100;
+  }
+
+  .dark .neo-button-secondary {
+    @apply bg-slate-800 text-slate-200 hover:bg-slate-700;
+  }
+
+  /* Neo Input */
+  .neo-input {
+    @apply w-full px-4 py-3 bg-slate-50 border border-slate-200 text-slate-900 placeholder:text-slate-400;
+    @apply focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-300;
+    @apply transition-all duration-200;
+    border-radius: var(--radius-md);
+  }
+
+  .dark .neo-input {
+    @apply bg-slate-800/50 border-slate-700 text-slate-100 placeholder:text-slate-500;
+    @apply focus:ring-slate-100/10 focus:border-slate-600;
+  }
+
+  /* Text Gradient */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600;
+  }
+
+  /* Skeleton Loader */
+  .skeleton {
+    @apply bg-slate-100 rounded-lg animate-pulse;
+  }
+
+  .dark .skeleton {
+    @apply bg-slate-800;
+  }
+
+  /* Custom Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-300;
+  }
+
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-700;
+  }
+
+  /* Safe area for mobile */
+  .safe-area-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 1rem);
+  }
+
+  /* Badge */
+  .neo-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-full;
+  }
+
+  .neo-badge-primary {
+    @apply bg-blue-50 text-blue-700;
+  }
+
+  .neo-badge-secondary {
+    @apply bg-slate-100 text-slate-600;
+  }
+
+  .dark .neo-badge-primary {
+    @apply bg-blue-900/30 text-blue-400;
+  }
+
+  .dark .neo-badge-secondary {
+    @apply bg-slate-800 text-slate-400;
+  }
+
+  /* Avatar */
+  .neo-avatar {
+    @apply rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center font-semibold text-slate-600 overflow-hidden;
+  }
+
+  .dark .neo-avatar {
+    @apply from-slate-700 to-slate-800 text-slate-300;
+  }
+
+  /* Divider */
+  .neo-divider {
+    @apply h-px bg-slate-100;
+  }
+
+  .dark .neo-divider {
+    @apply bg-slate-800;
+  }
+}
+
+/* Animations */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes heart-beat {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  25%,
+  75% {
+    transform: scale(1.2);
+  }
+
+  50% {
+    transform: scale(1);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-heart {
+  animation: heart-beat 0.4s ease-in-out;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Focus styles */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  @apply outline-none ring-2 ring-slate-900/20 ring-offset-2;
+}
+
+.dark button:focus-visible,
+.dark a:focus-visible,
+.dark input:focus-visible,
+.dark textarea:focus-visible,
+.dark select:focus-visible {
+  @apply ring-slate-100/20 ring-offset-slate-900;
+}
+
+/* Selection */
+::selection {
+  @apply bg-blue-100 text-blue-900;
+}
+
+.dark ::selection {
+  @apply bg-blue-900/50 text-blue-100;
+}
+
+/* Animations */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes heart-beat {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  25%,
+  75% {
+    transform: scale(1.2);
+  }
+
+  50% {
+    transform: scale(1);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.5s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-heart {
+  animation: heart-beat 0.4s ease-in-out;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Focus styles */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  @apply outline-none ring-2 ring-slate-900/10 ring-offset-2;
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(96, 165, 250, 0.2);
+  color: rgb(2, 6, 23);
+}

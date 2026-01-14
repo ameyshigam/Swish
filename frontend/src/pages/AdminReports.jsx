@@ -68,46 +68,51 @@ const AdminReports = () => {
     if (loading) return <div className="p-8 text-center">Loading...</div>;
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-8">
+        <div className="space-y-8">
             {/* High Priority: Flagged Posts */}
             <div>
-                <h2 className="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
-                    <AlertTriangle className="text-red-500" />
-                    Flagged Posts (High Priority)
-                    </h2>
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-3 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl shadow-lg shadow-red-500/20">
+                        <AlertTriangle className="text-white" size={20} />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-foreground">Flagged Posts</h2>
+                        <p className="text-sm text-muted-foreground">{flaggedPosts.length} posts require attention</p>
+                    </div>
+                </div>
+                <div className="neo-card overflow-hidden">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-red-50 border-b border-red-100">
-                                <th className="p-4 font-semibold text-slate-700">Post Subject/Content</th>
-                                <th className="p-4 font-semibold text-slate-700">Author</th>
-                                <th className="p-4 font-semibold text-slate-700">Report Count</th>
-                                <th className="p-4 font-semibold text-slate-700 text-right">Actions</th>
+                            <tr className="bg-destructive/10 border-b border-destructive/20">
+                                <th className="p-4 font-semibold text-foreground">Post Subject/Content</th>
+                                <th className="p-4 font-semibold text-foreground">Author</th>
+                                <th className="p-4 font-semibold text-foreground">Report Count</th>
+                                <th className="p-4 font-semibold text-foreground text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {flaggedPosts.length === 0 ? (
-                                <tr><td colSpan="4" className="p-6 text-center text-slate-500">No flagged posts</td></tr>
+                                <tr><td colSpan="4" className="p-6 text-center text-muted-foreground">No flagged posts</td></tr>
                             ) : (
                                 flaggedPosts.map(post => {
                                     const count = postReportCounts[post._id];
                                     const isHighRisk = count >= 5;
                                     return (
-                                        <tr key={post._id} className={`border-b border-slate-100 ${isHighRisk ? 'bg-red-50/50' : ''}`}>
-                                            <td className="p-4 max-w-md truncate">
+                                        <tr key={post._id} className={`border-b border-border ${isHighRisk ? 'bg-destructive/10' : ''}`}>
+                                            <td className="p-4 max-w-md truncate text-foreground">
                                                 {post.content || post.caption || 'No content'}
                                             </td>
-                                            <td className="p-4">
+                                            <td className="p-4 text-muted-foreground">
                                                 {/* Author info might need population or lookup */}
-                                                User ID: {post.authorId} 
+                                                User ID: {post.authorId}
                                             </td>
-                                            <td className="p-4 font-bold text-red-600">
+                                            <td className="p-4 font-bold text-destructive">
                                                 {count} {isHighRisk && '(Auto-Removal Recommended)'}
                                             </td>
                                             <td className="p-4 text-right">
-                                                <button 
+                                                <button
                                                     onClick={() => handleDeletePost(post._id)}
-                                                    className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium"
+                                                    className="px-3 py-1 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90 transition-colors text-sm font-medium"
                                                 >
                                                     Remove Post
                                                 </button>
@@ -123,38 +128,45 @@ const AdminReports = () => {
 
             {/* All Reports List */}
             <div>
-                <h2 className="text-xl font-bold text-slate-100 mb-4">All Reports</h2>
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-3 bg-gradient-to-br from-primary to-purple-600 rounded-xl shadow-lg shadow-primary/20">
+                        <Eye className="text-white" size={20} />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-foreground">All Reports</h2>
+                        <p className="text-sm text-muted-foreground">{reports.length} total reports</p>
+                    </div>
+                </div>
+                <div className="neo-card overflow-hidden">
                     <table className="w-full text-left border-collapse">
-                            <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200">
-                                <th className="p-4 font-semibold text-slate-600">Type</th>
-                                <th className="p-4 font-semibold text-slate-600">Reason</th>
-                                <th className="p-4 font-semibold text-slate-600">Description</th>
-                                <th className="p-4 font-semibold text-slate-600">Status</th>
-                                <th className="p-4 font-semibold text-slate-600 text-right">Actions</th>
+                        <thead>
+                            <tr className="bg-muted/50 border-b border-border">
+                                <th className="p-4 font-semibold text-muted-foreground">Type</th>
+                                <th className="p-4 font-semibold text-muted-foreground">Reason</th>
+                                <th className="p-4 font-semibold text-muted-foreground">Description</th>
+                                <th className="p-4 font-semibold text-muted-foreground">Status</th>
+                                <th className="p-4 font-semibold text-muted-foreground text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {reports.map(report => (
-                                <tr key={report._id} className="border-b border-slate-100">
-                                    <td className="p-4 capitalize">{report.type}</td>
+                                <tr key={report._id} className="border-b border-border hover:bg-muted/50 transition-colors">
+                                    <td className="p-4 capitalize text-foreground">{report.type}</td>
                                     <td className="p-4">
-                                        <span className="px-2 py-1 bg-slate-100 rounded text-xs font-medium">{report.reason}</span>
+                                        <span className="px-2 py-1 bg-muted rounded text-xs font-medium text-muted-foreground">{report.reason}</span>
                                     </td>
-                                    <td className="p-4 text-sm text-slate-600 max-w-xs truncate">{report.description}</td>
+                                    <td className="p-4 text-sm text-muted-foreground max-w-xs truncate">{report.description}</td>
                                     <td className="p-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                                            report.status === 'resolved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                                        }`}>
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${report.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'
+                                            }`}>
                                             {report.status || 'pending'}
                                         </span>
                                     </td>
                                     <td className="p-4 text-right">
                                         {report.status !== 'resolved' && (
-                                            <button 
+                                            <button
                                                 onClick={() => handleUpdateReport(report._id, 'resolved')}
-                                                className="text-green-600 hover:text-green-800 font-medium text-sm flex items-center gap-1 justify-end w-full"
+                                                className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 font-medium text-sm flex items-center gap-1 justify-end w-full"
                                             >
                                                 <CheckCircle size={16} /> Mark Resolved
                                             </button>
