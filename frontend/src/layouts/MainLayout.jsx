@@ -14,21 +14,31 @@ const NavItem = ({ to, icon: IconComponent, label, badge = 0, onClick, collapsed
             onClick={onClick}
             end={to === '/' || to === '/admin'}
             className={({ isActive }) => {
-                const baseCollapsed = 'flex items-center justify-center p-3 rounded-lg transition-all duration-200 group relative';
+                const baseCollapsed = 'flex items-center justify-center p-3 rounded-xl transition-all duration-300 group relative';
                 const baseExpanded = 'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden';
-                // Active: Gradient vertical bar + subtle background
-                const active = 'nav-glow-active text-primary font-bold shadow-sm';
-                // Inactive: Smooth slide right on hover
-                const inactive = 'text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:translate-x-1 transition-transform duration-200';
+                // Active: Gradient background with glow
+                const active = 'bg-gradient-to-r from-violet-600/20 via-fuchsia-500/20 to-pink-500/20 text-foreground font-semibold border border-violet-500/30';
+                // Inactive: Smooth transition on hover
+                const inactive = 'text-muted-foreground hover:text-foreground hover:bg-muted/50';
                 return `${collapsed ? baseCollapsed : baseExpanded} ${isActive ? active : inactive}`;
             }}
         >
-            <IconComponent size={20} strokeWidth={2} />
-            {!collapsed && <span className="font-medium">{label}</span>}
-            {badge > 0 && (
-                <span className={`${collapsed ? 'absolute -top-1 -right-1' : 'ml-auto'} bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center badge-pulse`}>
-                    {badge > 99 ? '99+' : badge}
-                </span>
+            {({ isActive }) => (
+                <>
+                    {/* Active indicator bar */}
+                    {isActive && !collapsed && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-violet-500 via-fuchsia-500 to-pink-500 rounded-r-full"></div>
+                    )}
+                    <div className={`flex items-center justify-center ${isActive ? 'text-violet-500' : ''}`}>
+                        <IconComponent size={20} strokeWidth={2} />
+                    </div>
+                    {!collapsed && <span className="font-medium">{label}</span>}
+                    {badge > 0 && (
+                        <span className={`${collapsed ? 'absolute -top-1 -right-1' : 'ml-auto'} bg-gradient-to-r from-red-500 to-pink-500 text-white text-[11px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-lg shadow-red-500/30`}>
+                            {badge > 99 ? '99+' : badge}
+                        </span>
+                    )}
+                </>
             )}
         </NavLink>
     );
@@ -71,11 +81,11 @@ const MainLayout = () => {
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
             {/* Desktop Sidebar */}
             {/* Desktop Sidebar - Visible only on LG screens and up */}
-            <aside className="fixed left-0 top-0 h-screen w-64 hidden lg:flex flex-col glass-panel z-20 overflow-y-auto custom-scrollbar border-r-0">
+            <aside className="fixed left-0 top-0 h-screen w-64 hidden lg:flex flex-col bg-sidebar/80 backdrop-blur-xl z-20 overflow-y-auto custom-scrollbar border-r border-sidebar-border/30">
                 {/* Logo */}
-                <div className="p-6 border-b border-sidebar-border/50">
+                <div className="p-6 border-b border-sidebar-border/30">
                     <Link to="/" className="flex items-center gap-3 group">
-                        <div className="w-11 h-11 bg-gradient-to-br from-primary via-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-primary/30 group-hover:scale-105 transition-transform">S</div>
+                        <div className="w-12 h-12 bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-fuchsia-500/30 group-hover:scale-105 group-hover:shadow-fuchsia-500/50 transition-all duration-300">S</div>
                         <span className="text-xl font-bold text-sidebar-foreground tracking-tight">Swish</span>
                     </Link>
                 </div>
@@ -107,11 +117,11 @@ const MainLayout = () => {
                 {/* Create Post Button - Only for Non-Admins */}
                 {user?.role !== 'Admin' && (
                     <div className="p-4 border-t border-sidebar-border/30 space-y-3">
-                        <Link to="/create" className="glow-button flex items-center justify-center gap-2 w-full py-3.5">
+                        <Link to="/create" className="flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 text-white rounded-xl font-semibold hover:opacity-90 hover:scale-[1.02] transition-all shadow-lg shadow-fuchsia-500/30">
                             <Plus size={20} />
                             <span>Create Post</span>
                         </Link>
-                        <Link to="/create-story" className="flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-orange-500 via-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40">
+                        <Link to="/create-story" className="flex items-center justify-center gap-2 w-full py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white rounded-xl font-semibold hover:opacity-90 hover:scale-[1.02] transition-all shadow-lg shadow-orange-500/30">
                             <Camera size={20} />
                             <span>Add Story</span>
                         </Link>
@@ -119,17 +129,19 @@ const MainLayout = () => {
                 )}
 
                 {/* User Section */}
-                <div className="p-4 border-t border-sidebar-border/50">
-                    <div className="flex items-center justify-between mb-3">
-                        <Link to="/profile" className="flex items-center gap-3 p-2 rounded-xl hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground transition-colors flex-1">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-600 flex-shrink-0 overflow-hidden shadow-md">
-                                {user?.profileData?.avatarUrl ? (
-                                    <img src={getServerUrl(user.profileData.avatarUrl)} alt="Me" className="w-full h-full object-cover" />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-white font-semibold text-sm">
-                                        {user?.username?.[0]?.toUpperCase() || 'U'}
-                                    </div>
-                                )}
+                <div className="p-4 border-t border-sidebar-border/30">
+                    <div className="flex items-center justify-between mb-3 p-2 rounded-xl bg-gradient-to-r from-violet-500/5 via-fuchsia-500/5 to-pink-500/5 border border-sidebar-border/20">
+                        <Link to="/profile" className="flex items-center gap-3 flex-1 hover:opacity-80 transition-opacity">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 p-[2px] flex-shrink-0 shadow-md shadow-fuchsia-500/20">
+                                <div className="w-full h-full rounded-[10px] bg-sidebar overflow-hidden flex items-center justify-center">
+                                    {user?.profileData?.avatarUrl ? (
+                                        <img src={getServerUrl(user.profileData.avatarUrl)} alt="Me" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="text-foreground font-semibold text-sm">
+                                            {user?.username?.[0]?.toUpperCase() || 'U'}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="font-semibold text-sidebar-foreground truncate text-sm">{user?.username}</p>
@@ -137,10 +149,10 @@ const MainLayout = () => {
                             </div>
                         </Link>
                         <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 rounded-xl transition-all">
-                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                         </button>
                     </div>
-                    <button onClick={logout} className="flex items-center gap-2 w-full px-4 py-2.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl text-sm font-medium transition-colors">
+                    <button onClick={logout} className="flex items-center gap-2 w-full px-4 py-2.5 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-xl text-sm font-medium transition-all">
                         <LogOut size={16} />
                         Sign out
                     </button>
@@ -148,9 +160,9 @@ const MainLayout = () => {
             </aside>
 
             {/* Tablet Sidebar */}
-            <aside className="fixed left-0 top-0 h-screen w-20 hidden md:flex lg:hidden flex-col bg-sidebar/80 backdrop-blur-xl border-r border-sidebar-border/50 z-20">
-                <div className="p-4 flex justify-center border-b border-sidebar-border/50">
-                    <Link to="/" className="w-11 h-11 bg-gradient-to-br from-primary via-purple-600 to-pink-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-primary/30">S</Link>
+            <aside className="fixed left-0 top-0 h-screen w-20 hidden md:flex lg:hidden flex-col bg-sidebar/80 backdrop-blur-xl border-r border-sidebar-border/30 z-20">
+                <div className="p-4 flex justify-center border-b border-sidebar-border/30">
+                    <Link to="/" className="w-12 h-12 bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold shadow-lg shadow-fuchsia-500/30 hover:scale-105 transition-transform">S</Link>
                 </div>
 
                 <nav className="flex-1 p-3 space-y-2 flex flex-col items-center">
@@ -164,45 +176,51 @@ const MainLayout = () => {
                     {user?.role === 'Admin' && <NavItem to="/admin" icon={Shield} collapsed />}
                 </nav>
 
-                <div className="p-3 border-t border-transparent flex flex-col items-center gap-2">
-                    <Link to="/create" className="w-12 h-12 bg-sidebar-primary text-sidebar-primary-foreground rounded-xl flex items-center justify-center">
+                <div className="p-3 border-t border-sidebar-border/30 flex flex-col items-center gap-2">
+                    <Link to="/create" className="w-12 h-12 bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-fuchsia-500/30 hover:scale-105 transition-transform">
                         <Plus size={22} />
                     </Link>
-                    <button onClick={logout} className="p-3 text-muted-foreground hover:text-destructive rounded-xl transition-colors"><LogOut size={20} /></button>
+                    <button onClick={logout} className="p-3 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"><LogOut size={20} /></button>
                 </div>
             </aside>
 
             {/* Mobile/Tablet Header - Visible below LG screens */}
-            <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-lg border-b border-border shadow-sm">
+            <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/50 shadow-sm">
                 <div className="flex items-center justify-between px-4 py-3">
-                    <Link to="/" className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-sm">S</div>
+                    <Link to="/" className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-fuchsia-500/30">S</div>
                         <span className="text-lg font-bold text-foreground">Swish</span>
                     </Link>
 
-                    <div className="flex items-center gap-2">
-                        <NavLink to="/messages" className="p-2 text-muted-foreground"><MessageCircle size={22} /></NavLink>
-                        <NavLink to="/notifications" className="relative p-2 text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                        <NavLink to="/messages" className={({ isActive }) => `p-2.5 rounded-xl transition-all ${isActive ? 'text-violet-500 bg-violet-500/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                            <MessageCircle size={22} />
+                        </NavLink>
+                        <NavLink to="/notifications" className={({ isActive }) => `relative p-2.5 rounded-xl transition-all ${isActive ? 'text-violet-500 bg-violet-500/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
                             <Bell size={22} />
                             {unreadNotifications > 0 && (
-                                <span className="absolute top-1 right-1 bg-destructive text-destructive-foreground text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center badge-pulse">{unreadNotifications > 9 ? '9+' : unreadNotifications}</span>
+                                <span className="absolute top-1 right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-lg shadow-red-500/30">{unreadNotifications > 9 ? '9+' : unreadNotifications}</span>
                             )}
                         </NavLink>
-                        <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-2 text-muted-foreground">
+                        <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all">
                             {theme === 'dark' ? <Sun size={22} /> : <Moon size={22} />}
                         </button>
-                        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-muted-foreground"><Menu size={22} /></button>
+                        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-xl transition-all"><Menu size={22} /></button>
                     </div>
                 </div>
             </header>
 
             {/* Mobile Menu Overlay */}
             {mobileMenuOpen && (
-                <div className="lg:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={closeMobileMenu}>
-                    <div className="absolute right-0 top-0 h-full w-72 bg-background shadow-2xl animate-slide-in" onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center p-4 border-b border-border">
-                            <span className="text-lg font-bold text-foreground">Menu</span>
-                            <button onClick={closeMobileMenu} className="p-2 hover:bg-muted rounded-lg text-muted-foreground"><X size={20} /></button>
+                <div className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={closeMobileMenu}>
+                    <div className="absolute right-0 top-0 h-full w-80 bg-background/95 backdrop-blur-xl shadow-2xl animate-slide-in border-l border-border/30" onClick={e => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="flex justify-between items-center p-4 border-b border-border/30">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md">S</div>
+                                <span className="text-lg font-bold text-foreground">Menu</span>
+                            </div>
+                            <button onClick={closeMobileMenu} className="p-2 hover:bg-muted/50 rounded-xl text-muted-foreground transition-colors"><X size={20} /></button>
                         </div>
 
                         <nav className="p-4 space-y-1">
@@ -219,25 +237,26 @@ const MainLayout = () => {
                             )}
                         </nav>
 
-                        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background">
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-3 p-2">
-                                    <div className="w-10 h-10 rounded-full bg-muted flex-shrink-0 overflow-hidden">
+                        {/* User Section */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border/30 bg-background/80 backdrop-blur-xl">
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-violet-500/5 via-fuchsia-500/5 to-pink-500/5 border border-border/20 mb-3">
+                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-pink-500 p-[2px] flex-shrink-0 shadow-md shadow-fuchsia-500/20">
+                                    <div className="w-full h-full rounded-[9px] bg-background overflow-hidden flex items-center justify-center">
                                         {user?.profileData?.avatarUrl ? (
                                             <img src={getServerUrl(user.profileData.avatarUrl)} alt="Me" className="w-full h-full object-cover" />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-muted-foreground font-semibold">
+                                            <span className="text-foreground font-semibold">
                                                 {user?.username?.[0]?.toUpperCase() || 'U'}
-                                            </div>
+                                            </span>
                                         )}
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-foreground text-sm">{user?.username}</p>
-                                        <p className="text-xs text-muted-foreground">{user?.role}</p>
-                                    </div>
+                                </div>
+                                <div>
+                                    <p className="font-semibold text-foreground text-sm">{user?.username}</p>
+                                    <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
                                 </div>
                             </div>
-                            <button onClick={() => { logout(); closeMobileMenu(); }} className="flex items-center justify-center gap-2 w-full py-2.5 text-destructive bg-destructive/10 hover:bg-destructive/20 rounded-xl text-sm font-medium transition-colors">
+                            <button onClick={() => { logout(); closeMobileMenu(); }} className="flex items-center justify-center gap-2 w-full py-3 text-red-500 bg-red-500/10 hover:bg-red-500/20 rounded-xl text-sm font-semibold transition-all">
                                 <LogOut size={16} />
                                 Sign out
                             </button>
@@ -254,22 +273,22 @@ const MainLayout = () => {
             </main>
 
             {/* Mobile/Tablet Bottom Nav - Visible below LG screens */}
-            <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-card/95 backdrop-blur-lg border-t border-border shadow-lg safe-area-bottom">
-                <div className="flex items-center justify-around py-2">
-                    <NavLink to="/" className={({ isActive }) => `p-3 rounded-xl transition-all ${isActive ? 'text-white bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-cyan-500/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                        <Home size={24} />
+            <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-background/80 backdrop-blur-xl border-t border-border/30 shadow-lg safe-area-bottom">
+                <div className="flex items-center justify-around py-2 px-2">
+                    <NavLink to="/" end className={({ isActive }) => `p-3 rounded-xl transition-all duration-300 ${isActive ? 'text-white bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 shadow-lg shadow-fuchsia-500/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                        <Home size={22} />
                     </NavLink>
-                    <NavLink to="/explore" className={({ isActive }) => `p-3 rounded-xl transition-all ${isActive ? 'text-white bg-gradient-to-br from-violet-500 to-purple-500 shadow-lg shadow-purple-500/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                        <Compass size={24} />
+                    <NavLink to="/explore" className={({ isActive }) => `p-3 rounded-xl transition-all duration-300 ${isActive ? 'text-white bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 shadow-lg shadow-fuchsia-500/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                        <Compass size={22} />
                     </NavLink>
-                    <NavLink to="/create" className="w-12 h-12 bg-gradient-to-br from-orange-500 via-pink-500 to-purple-600 text-white rounded-xl flex items-center justify-center -mt-4 shadow-lg shadow-pink-500/40 hover:scale-105 transition-transform">
-                        <Plus size={24} />
+                    <NavLink to="/create" className="w-14 h-14 bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 text-white rounded-2xl flex items-center justify-center -mt-6 shadow-xl shadow-fuchsia-500/40 hover:scale-110 active:scale-95 transition-transform ring-4 ring-background">
+                        <Plus size={26} />
                     </NavLink>
-                    <NavLink to="/bookmarks" className={({ isActive }) => `p-3 rounded-xl transition-all ${isActive ? 'text-white bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-orange-500/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                        <Bookmark size={24} />
+                    <NavLink to="/bookmarks" className={({ isActive }) => `p-3 rounded-xl transition-all duration-300 ${isActive ? 'text-white bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 shadow-lg shadow-fuchsia-500/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                        <Bookmark size={22} />
                     </NavLink>
-                    <NavLink to="/profile" className={({ isActive }) => `p-3 rounded-xl transition-all ${isActive ? 'text-white bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-teal-500/30' : 'text-muted-foreground hover:text-foreground'}`}>
-                        <User size={24} />
+                    <NavLink to="/profile" className={({ isActive }) => `p-3 rounded-xl transition-all duration-300 ${isActive ? 'text-white bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 shadow-lg shadow-fuchsia-500/30' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}>
+                        <User size={22} />
                     </NavLink>
                 </div>
             </nav>

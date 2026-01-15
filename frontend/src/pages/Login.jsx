@@ -55,47 +55,52 @@ const Login = () => {
         <div className="min-h-screen bg-background flex transition-colors duration-300">
             {/* Left Panel - Premium Branding */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-                {/* Gradient Background */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,oklch(0.12_0.04_280),oklch(0.08_0.02_270))]"></div>
+                {/* Vibrant Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-cyan-500 to-teal-400"></div>
 
-                {/* Animated Orbs */}
+                {/* Animated Floating Orbs */}
                 <div className="absolute inset-0">
-                    <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse"></div>
-                    <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-purple-500/20 rounded-full blur-[80px] animate-pulse delay-1000"></div>
-                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-[60px] animate-pulse delay-2000"></div>
+                    <div className="absolute top-1/4 -left-20 w-96 h-96 bg-white/20 rounded-full blur-[100px] animate-pulse"></div>
+                    <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-sky-300/30 rounded-full blur-[80px] animate-pulse delay-1000"></div>
+                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-cyan-300/20 rounded-full blur-[60px] animate-pulse delay-500"></div>
+                    <div className="absolute top-10 right-20 w-40 h-40 bg-white/10 rounded-full blur-3xl animate-pulse delay-700"></div>
                 </div>
 
+                {/* Noise Texture */}
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+
                 {/* Grid Pattern */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:60px_60px]"></div>
 
                 <div className="relative z-10 flex flex-col justify-center px-16 text-white">
                     {/* Logo */}
                     <div className="flex items-center gap-4 mb-12">
-                        <div className="w-14 h-14 bg-gradient-to-br from-primary via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-2xl shadow-primary/30">
+                        <div className="w-16 h-16 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-2xl border border-white/20">
                             S
                         </div>
-                        <span className="text-4xl font-black tracking-tight">Swish</span>
+                        <span className="text-4xl font-black tracking-tight drop-shadow-lg">Swish</span>
                     </div>
 
-                    <h2 className="text-4xl font-black mb-4 leading-tight">
+                    <h2 className="text-5xl font-black mb-6 leading-tight drop-shadow-lg">
                         Connect with your<br />campus community
                     </h2>
-                    <p className="text-slate-400 text-lg max-w-md leading-relaxed">
+                    <p className="text-white/80 text-lg max-w-md leading-relaxed">
                         Share moments, discover events, and stay connected with fellow students and faculty.
                     </p>
 
-                    <div className="mt-16 flex gap-12">
-                        <div className="group">
-                            <div className="text-3xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">{formatCount(stats.users)}</div>
-                            <div className="text-slate-500 text-sm mt-1 font-medium">Active Users</div>
+                    {/* Stats with glassmorphism */}
+                    <div className="mt-16 flex gap-6">
+                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:-translate-y-1">
+                            <div className="text-4xl font-black">{formatCount(stats.users)}</div>
+                            <div className="text-white/70 text-sm mt-1 font-medium">Active Users</div>
                         </div>
-                        <div className="group">
-                            <div className="text-3xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">{formatCount(stats.posts)}</div>
-                            <div className="text-slate-500 text-sm mt-1 font-medium">Posts Shared</div>
+                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:-translate-y-1">
+                            <div className="text-4xl font-black">{formatCount(stats.posts)}</div>
+                            <div className="text-white/70 text-sm mt-1 font-medium">Posts Shared</div>
                         </div>
-                        <div className="group">
-                            <div className="text-3xl font-black bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">{formatCount(stats.communities)}</div>
-                            <div className="text-slate-500 text-sm mt-1 font-medium">Communities</div>
+                        <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20 hover:bg-white/20 transition-all duration-300 hover:-translate-y-1">
+                            <div className="text-4xl font-black">{formatCount(stats.communities)}</div>
+                            <div className="text-white/70 text-sm mt-1 font-medium">Communities</div>
                         </div>
                     </div>
                 </div>
@@ -106,7 +111,7 @@ const Login = () => {
                 <div className="w-full max-w-md">
                     {/* Mobile Logo */}
                     <div className="lg:hidden text-center mb-10">
-                        <div className="w-12 h-12 bg-gradient-to-br from-primary via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg mx-auto mb-4 shadow-xl shadow-primary/30">
+                        <div className="w-14 h-14 bg-gradient-to-br from-blue-600 via-cyan-500 to-teal-400 rounded-2xl flex items-center justify-center text-white font-bold text-xl mx-auto mb-4 shadow-xl shadow-cyan-500/30">
                             S
                         </div>
                         <span className="text-2xl font-black text-foreground">Swish</span>
@@ -157,7 +162,7 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="neo-button-primary w-full rounded-xl flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed py-4"
+                            className="w-full py-4 bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 text-white rounded-xl font-semibold flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 hover:scale-[1.02] transition-all shadow-lg shadow-cyan-500/30"
                         >
                             {loading ? (
                                 <>
