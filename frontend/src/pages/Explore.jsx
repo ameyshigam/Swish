@@ -87,10 +87,11 @@ const Explore = () => {
                 {/* Search Card - Spans 8 columns */}
                 {/* Search Card - Spans 8 columns */}
                 <div className="lg:col-span-8 relative z-20">
-                    <div className="glass-card p-6 h-full relative group">
+                    <div className="glass-card p-6 h-full relative group overflow-hidden">
                         {/* Decorative Gradient Blob - Wrapped to prevent overflow clipping of dropdown */}
-                        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                        <div className="absolute inset-0 pointer-events-none">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16 animate-pulse"></div>
+                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl -ml-10 -mb-10 animate-pulse delay-700"></div>
                         </div>
 
                         <div className="flex items-center gap-4 mb-6 relative z-10">
@@ -98,7 +99,7 @@ const Explore = () => {
                                 <Compass className="text-white" size={24} />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold text-foreground">Explore</h1>
+                                <h1 className="text-2xl font-bold text-gradient-animated">Explore</h1>
                                 <p className="text-sm text-muted-foreground">Discover new people and content</p>
                             </div>
                         </div>
@@ -124,27 +125,27 @@ const Explore = () => {
 
                             {/* Search Results */}
                             {searchResults.length > 0 && (
-                                <div className="absolute top-full mt-2 w-full bg-gray-900 border border-gray-700 rounded-xl overflow-hidden z-[100] shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[400px] overflow-y-auto">
+                                <div className="absolute top-full mt-2 w-full bg-popover border border-border rounded-xl overflow-hidden z-[100] shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[400px] overflow-y-auto">
 
                                     {/* Users Section */}
                                     {searchResults.some(r => r.type === 'user') && (
                                         <div className="py-2">
-                                            <div className="px-4 py-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">People</div>
+                                            <div className="px-4 py-2 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">People</div>
                                             {searchResults.filter(r => r.type === 'user').map(user => (
                                                 <Link
                                                     key={user._id}
                                                     to={`/user/${user._id}`}
                                                     onClick={() => setSearchQuery('')}
-                                                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors"
+                                                    className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors group/item"
                                                 >
-                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-white/10 group-hover/item:ring-white/20 transition-all">
+                                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md ring-2 ring-background group-hover/item:ring-primary/20 transition-all">
                                                         {user.username?.[0]?.toUpperCase()}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="font-semibold text-gray-100 text-sm truncate group-hover/item:text-primary transition-colors">{user.username}</p>
-                                                        <p className="text-xs text-gray-400 capitalize">{user.role}</p>
+                                                        <p className="font-semibold text-foreground text-sm truncate group-hover/item:text-primary transition-colors">{user.username}</p>
+                                                        <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
                                                     </div>
-                                                    <ArrowRight size={14} className="text-gray-400 opacity-0 group-hover/item:opacity-100 transition-all -translate-x-2 group-hover/item:translate-x-0" />
+                                                    <ArrowRight size={14} className="text-muted-foreground opacity-0 group-hover/item:opacity-100 transition-all -translate-x-2 group-hover/item:translate-x-0" />
                                                 </Link>
                                             ))}
                                         </div>
@@ -152,32 +153,32 @@ const Explore = () => {
 
                                     {/* Divider if both exist */}
                                     {searchResults.some(r => r.type === 'user') && searchResults.some(r => r.type === 'post') && (
-                                        <div className="h-px bg-gray-800 mx-4 my-1"></div>
+                                        <div className="h-px bg-border mx-4 my-1"></div>
                                     )}
 
                                     {/* Posts Section */}
                                     {searchResults.some(r => r.type === 'post') && (
                                         <div className="py-2">
-                                            <div className="px-4 py-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Posts</div>
+                                            <div className="px-4 py-2 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Posts</div>
                                             {searchResults.filter(r => r.type === 'post').map(post => (
                                                 <Link
                                                     key={post._id}
                                                     to={`/post/${post._id}`}
                                                     onClick={() => setSearchQuery('')}
-                                                    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800 transition-colors"
+                                                    className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors group/item"
                                                 >
-                                                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-white overflow-hidden shadow-md ring-1 ring-white/10 group-hover/item:ring-white/20 transition-all">
+                                                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-muted-foreground overflow-hidden shadow-md ring-1 ring-border group-hover/item:ring-primary/20 transition-all">
                                                         {post.imageUrl ? (
                                                             <img src={post.imageUrl} alt="" className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <TrendingUp size={16} className="text-gray-400" />
+                                                            <TrendingUp size={16} />
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-medium text-foreground text-sm truncate group-hover/item:text-primary transition-colors">{post.caption}</p>
-                                                        <p className="text-xs text-gray-400 truncate">by {post.author?.username}</p>
+                                                        <p className="text-xs text-muted-foreground truncate">by {post.author?.username}</p>
                                                     </div>
-                                                    <ArrowRight size={14} className="text-gray-400 opacity-0 group-hover/item:opacity-100 transition-all -translate-x-2 group-hover/item:translate-x-0" />
+                                                    <ArrowRight size={14} className="text-muted-foreground opacity-0 group-hover/item:opacity-100 transition-all -translate-x-2 group-hover/item:translate-x-0" />
                                                 </Link>
                                             ))}
                                         </div>
@@ -193,7 +194,7 @@ const Explore = () => {
 
                 {/* Stats Card - Spans 4 columns */}
                 <div className="lg:col-span-4">
-                    <div className="bg-gradient-to-br from-primary via-purple-600 to-pink-600 rounded-2xl p-6 h-full text-white relative overflow-hidden shadow-lg">
+                    <div className="bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500 rounded-2xl p-6 h-full text-white relative overflow-hidden shadow-lg shadow-fuchsia-500/25">
                         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
                         <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mb-10"></div>
 
@@ -234,7 +235,7 @@ const Explore = () => {
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             {suggestedUsers.slice(0, 6).map(user => (
-                                <div key={user._id} className="relative neo-card p-4 text-center group hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                                <div key={user._id} className="relative glass-widget p-4 text-center group hover:-translate-y-2 hover:shadow-xl transition-all duration-300 border border-white/5">
                                     <Link to={`/user/${user._id}`}>
                                         <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 p-[2px] mb-3 group-hover:scale-105 transition-transform duration-300 shadow-md">
                                             <div className="w-full h-full rounded-xl bg-muted flex items-center justify-center text-white text-xl font-bold overflow-hidden">
@@ -292,7 +293,7 @@ const Explore = () => {
                         <TrendingUp className="text-white" size={20} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-foreground">Trending</h2>
+                        <h2 className="text-xl font-bold text-shimmer">Trending</h2>
                         <p className="text-sm text-muted-foreground">Popular posts right now</p>
                     </div>
                 </div>

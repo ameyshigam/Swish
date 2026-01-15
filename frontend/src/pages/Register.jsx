@@ -28,6 +28,9 @@ const Register = () => {
         if (formData.password.length < 6) {
             return setError("Password must be at least 6 characters");
         }
+        if (!formData.email.endsWith('@model.edu.in')) {
+            return setError('Please use your college email ending with @model.edu.in');
+        }
         setError('');
         setLoading(true);
         try {
@@ -161,7 +164,7 @@ const Register = () => {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                placeholder="student@university.edu"
+                                placeholder="student@model.edu.in"
                                 className="w-full px-4 py-3.5 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-border transition-all"
                                 required
                             />

@@ -50,10 +50,10 @@ const PostView = () => {
     }
 
     return (
-        <div className="max-w-2xl mx-auto pb-10">
+        <div className="max-w-2xl mx-auto pb-10 animate-slide-up-fade">
             <button
                 onClick={() => navigate(-1)}
-                className="mb-6 px-4 py-2 text-muted-foreground hover:text-foreground rounded-lg font-medium transition-colors inline-flex items-center gap-2"
+                className="mb-6 px-4 py-2.5 text-muted-foreground hover:text-foreground neo-button-ghost rounded-xl font-medium inline-flex items-center gap-2"
             >
                 <ArrowLeft size={20} /> Back
             </button>

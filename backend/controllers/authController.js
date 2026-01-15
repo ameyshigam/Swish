@@ -172,7 +172,8 @@ const getMe = async (req, res) => {
             username: user.username,
             email: user.email,
             role: user.role,
-            profileData: user.profileData
+            profileData: user.profileData,
+            bookmarks: user.bookmarks || []
         });
     } catch (error) {
         res.status(500).json({ message: 'Server Error' });
