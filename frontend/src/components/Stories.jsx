@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { Plus, X, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -203,7 +204,9 @@ const Stories = () => {
                             {uploading ? (
                                 <div className="animate-spin w-5 h-5 border-2 border-primary rounded-full border-t-transparent"></div>
                             ) : (
-                                <Plus size={24} className="text-primary group-hover:text-white transition-colors" />
+                                <div className="animate-pulse group-hover:animate-none duration-1000">
+                                    <Plus size={24} className="text-primary group-hover:text-white transition-colors" />
+                                </div>
                             )}
                         </div>
                         <div className="absolute inset-0 rounded-full bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -241,12 +244,12 @@ const Stories = () => {
             </div>
 
             {/* Instagram-style Viewer Modal */}
-            {viewingStory && currentStory && (
-                <div className="fixed inset-0 z-50 bg-background/50 flex items-center justify-center">
+            {viewingStory && currentStory && createPortal(
+                <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-200">
                     {/* Close Button */}
                     <button
                         onClick={closeViewer}
-                        className="absolute top-4 right-4 z-30 p-2 bg-black/60 text-white hover:bg-black/70 rounded-full"
+                        className="absolute top-4 right-4 z-50 p-2 bg-black/60 text-white hover:bg-black/70 rounded-full"
                         aria-label="Close story viewer"
                     >
                         <X size={24} />
@@ -255,21 +258,21 @@ const Stories = () => {
                     {/* Navigation Buttons (Desktop) */}
                     <button
                         onClick={(e) => { e.stopPropagation(); prevStory(); }}
-                        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-background/90 text-foreground p-2 rounded-full shadow z-30"
+                        className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-background/90 text-foreground p-2 rounded-full shadow z-50"
                         aria-label="Previous story"
                     >
                         <ChevronLeft size={32} />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); nextStory(); }}
-                        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-background/90 text-foreground p-2 rounded-full shadow z-30"
+                        className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-background/90 text-foreground p-2 rounded-full shadow z-50"
                         aria-label="Next story"
                     >
                         <ChevronRight size={32} />
                     </button>
 
                     {/* Story Container */}
-                    <div className="relative w-full max-w-md h-full md:h-[90vh] md:rounded-xl overflow-hidden bg-card shadow-lg flex flex-col">
+                    <div className="relative w-full max-w-md h-full md:h-[90vh] md:rounded-xl overflow-hidden bg-black shadow-2xl flex flex-col">
 
                         {/* Progress Bars */}
                         <div className="absolute top-0 left-0 right-0 z-20 p-2 flex gap-1">
@@ -292,7 +295,7 @@ const Stories = () => {
                                 {viewingStory.user.profileData?.avatarUrl ? (
                                     <img
                                         src={getMediaUrl(viewingStory.user.profileData.avatarUrl)}
-                                        className="w-8 h-8 rounded-full border border-white/50"
+                                        className="w-8 h-8 rounded-full border border-white/50 object-cover"
                                         alt={viewingStory.user.username}
                                     />
                                 ) : (
@@ -378,7 +381,8 @@ const Stories = () => {
                             )}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

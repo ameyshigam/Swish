@@ -56,7 +56,7 @@ const Profile = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Main Profile Card - Spans 8 columns */}
                 <div className="lg:col-span-8">
-                    <div className="neo-card overflow-hidden">
+                    <div className="glass-panel overflow-hidden">
                         {/* Cover */}
                         <div className="h-36 bg-gradient-to-br from-primary via-purple-600 to-pink-600 relative overflow-hidden">
                             <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50"></div>
@@ -171,7 +171,7 @@ const Profile = () => {
             </div>
 
             {/* Tabs */}
-            <div className="neo-card p-1.5 flex gap-1">
+            <div className="glass-widget p-1.5 flex gap-1">
                 <button
                     onClick={() => setActiveTab('posts')}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold transition-all ${activeTab === 'posts' ? 'bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg shadow-primary/20' : 'text-muted-foreground hover:bg-accent/50'
@@ -218,7 +218,7 @@ const Profile = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Bio Card */}
-                    <div className="neo-card p-5">
+                    <div className="glass-widget p-5">
                         <div className="flex items-center gap-2 mb-3">
                             <BookOpen size={16} className="text-muted-foreground" />
                             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Bio</span>
@@ -227,7 +227,7 @@ const Profile = () => {
                     </div>
 
                     {/* Location Card */}
-                    <div className="neo-card p-5">
+                    <div className="glass-widget p-5">
                         <div className="flex items-center gap-2 mb-3">
                             <MapPin size={16} className="text-muted-foreground" />
                             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Location</span>
@@ -237,7 +237,7 @@ const Profile = () => {
 
                     {/* Website Card */}
                     {profile?.profileData?.website && (
-                        <div className="neo-card p-5">
+                        <div className="glass-widget p-5">
                             <div className="flex items-center gap-2 mb-3">
                                 <LinkIcon size={16} className="text-muted-foreground" />
                                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Website</span>
@@ -249,7 +249,7 @@ const Profile = () => {
                     )}
 
                     {/* Joined Card */}
-                    <div className="neo-card p-5">
+                    <div className="glass-widget p-5">
                         <div className="flex items-center gap-2 mb-3">
                             <Calendar size={16} className="text-muted-foreground" />
                             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Joined</span>

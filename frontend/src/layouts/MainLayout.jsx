@@ -17,7 +17,7 @@ const NavItem = ({ to, icon: IconComponent, label, badge = 0, onClick, collapsed
                 const baseCollapsed = 'flex items-center justify-center p-3 rounded-lg transition-all duration-200 group relative';
                 const baseExpanded = 'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden';
                 // Active: Gradient vertical bar + subtle background
-                const active = 'bg-primary/10 text-primary font-bold shadow-sm before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-6 before:bg-gradient-to-b before:from-primary before:to-purple-600 before:rounded-r-full';
+                const active = 'nav-glow-active text-primary font-bold shadow-sm';
                 // Inactive: Smooth slide right on hover
                 const inactive = 'text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:translate-x-1 transition-transform duration-200';
                 return `${collapsed ? baseCollapsed : baseExpanded} ${isActive ? active : inactive}`;
@@ -71,7 +71,7 @@ const MainLayout = () => {
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
             {/* Desktop Sidebar */}
             {/* Desktop Sidebar - Visible only on LG screens and up */}
-            <aside className="fixed left-0 top-0 h-screen w-64 hidden lg:flex flex-col bg-sidebar/80 backdrop-blur-xl border-r border-sidebar-border/50 z-20 overflow-y-auto custom-scrollbar">
+            <aside className="fixed left-0 top-0 h-screen w-64 hidden lg:flex flex-col glass-panel z-20 overflow-y-auto custom-scrollbar border-r-0">
                 {/* Logo */}
                 <div className="p-6 border-b border-sidebar-border/50">
                     <Link to="/" className="flex items-center gap-3 group">

@@ -11,6 +11,9 @@
     line-height: 1.6;
     letter-spacing: -0.015em;
     transition: background-color 0.3s ease, color 0.3s ease;
+    background-image: radial-gradient(circle at 50% 0%, oklch(var(--primary) / 0.10), transparent 80%),
+      radial-gradient(circle at 90% 90%, oklch(var(--secondary) / 0.10), transparent 60%);
+    background-attachment: fixed;
   }
 
   h1,
@@ -58,7 +61,8 @@
   --destructive: 0.6 0.20 25;
   --destructive-foreground: 0.98 0 0;
 
-  --border: 0.90 0.02 275;
+  /* Darker border for better definition in light mode */
+  --border: 0.85 0.02 275;
   --input: 0.90 0.02 275;
   --ring: 0.60 0.25 290;
 
@@ -82,9 +86,9 @@
 
 .dark {
   /* Nebula Dark Mode - Deep Space Aesthetic */
-  --background: 0.10 0.04 275;
-  /* Deep Navy Void */
-  --foreground: 0.98 0.01 275;
+  --background: 0.12 0.04 280;
+  /* Deep Violet Void */
+  --foreground: 0.98 0.01 280;
   /* Starlight White */
 
   --card: 0.14 0.05 275;
@@ -178,14 +182,16 @@
   }
 
   .glass-card {
-    background: linear-gradient(145deg, oklch(var(--card) / 0.8), oklch(var(--card) / 0.5));
-    backdrop-filter: blur(30px);
-    /* Deep blur */
-    -webkit-backdrop-filter: blur(30px);
-    border: 1px solid oklch(var(--border) / 0.2);
-    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+    background: linear-gradient(145deg, oklch(var(--card) / 0.7), oklch(var(--card) / 0.4));
+    backdrop-filter: blur(40px) saturate(160%);
+    /* Deep Frost */
+    -webkit-backdrop-filter: blur(40px) saturate(160%);
+    border: 1px solid oklch(var(--primary) / 0.15);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
   }
 
   .glass-card:hover {
@@ -443,18 +449,23 @@
 }
 
 /* Futuristic Glow Button - For CTAs and important actions */
+/* Futuristic Glow Button - For CTAs and important actions */
 .glow-button {
   position: relative;
-  background: linear-gradient(135deg, oklch(var(--primary)), oklch(0.58 0.25 280));
+  background: linear-gradient(135deg, oklch(0.65 0.3 290), oklch(0.60 0.25 320), oklch(0.65 0.3 290));
+  background-size: 200% auto;
+  /* Electric Violet -> Neon Pink -> Violet Loop */
   color: white;
   border: none;
   border-radius: 0.75rem;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
+  padding: 0.75rem 1.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow:
-    0 4px 16px oklch(var(--primary) / 0.4),
-    0 0 0 0 oklch(var(--primary) / 0);
+    0 4px 20px oklch(0.65 0.3 290 / 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+  overflow: hidden;
 }
 
 .glow-button::before {
@@ -474,6 +485,7 @@
   box-shadow:
     0 8px 24px oklch(var(--primary) / 0.5),
     0 0 40px oklch(var(--primary) / 0.3);
+  animation: shimmer 3s linear infinite;
 }
 
 .glow-button:hover::before {

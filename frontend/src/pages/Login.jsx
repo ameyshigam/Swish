@@ -33,6 +33,11 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (!email.endsWith('@model.edu.in')) {
+            return setError('Please use your college email ending with @model.edu.in');
+        }
+
         setLoading(true);
         try {
             const res = await login(email, password);
@@ -51,13 +56,13 @@ const Login = () => {
             {/* Left Panel - Premium Branding */}
             <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
                 {/* Gradient Background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,oklch(0.12_0.04_280),oklch(0.08_0.02_270))]"></div>
 
                 {/* Animated Orbs */}
                 <div className="absolute inset-0">
                     <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse"></div>
-                    <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-purple-500/20 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '1s' }}></div>
-                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-[60px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+                    <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-purple-500/20 rounded-full blur-[80px] animate-pulse delay-1000"></div>
+                    <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-[60px] animate-pulse delay-2000"></div>
                 </div>
 
                 {/* Grid Pattern */}
@@ -131,7 +136,7 @@ const Login = () => {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full pl-11 pr-4 py-3.5 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-border transition-all"
-                                    placeholder="Enter your email"
+                                    placeholder="student@model.edu.in"
                                     required
                                 />
                             </div>

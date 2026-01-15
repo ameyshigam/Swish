@@ -86,25 +86,26 @@ const Home = () => {
         <div className="lg:grid lg:grid-cols-3 lg:gap-6 space-y-6 lg:space-y-0">
             {/* Stories row */}
             <div className="lg:col-span-2 space-y-6">
-                <div className="neo-card p-4 lg:p-6">
+                <div className="lg:p-1">
                     <Stories />
                 </div>
 
-                {/* Header */}
-                <div className="neo-card p-6 mb-6 relative overflow-hidden">
-                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-full blur-2xl pointer-events-none"></div>
-                    <div className="flex items-center justify-between relative z-10">
+                <div className="glass-panel p-6 mb-6 relative overflow-hidden text-center sm:text-left">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16 animate-pulse"></div>
+                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl -ml-16 -mb-16 animate-pulse" style={{ animationDelay: '1s' }}></div>
+
+                    <div className="flex flex-col sm:flex-row items-center justify-between relative z-10 gap-4">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-cyan-500/30">
-                                <HomeIcon className="text-white" size={24} />
+                            <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-cyan-500/30 ring-2 ring-white/10">
+                                <HomeIcon className="text-white" size={28} />
                             </div>
                             <div>
-                                <h1 className="text-xl font-bold text-foreground leading-tight">Your Feed</h1>
-                                <p className="text-muted-foreground text-sm">See what's happening on campus</p>
+                                <h1 className="text-2xl font-bold text-foreground leading-tight tracking-tight">Your Feed</h1>
+                                <p className="text-muted-foreground text-sm font-medium">See what's happening on campus</p>
                             </div>
                         </div>
-                        <button className="p-2.5 text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-xl transition-colors">
-                            <SlidersHorizontal size={20} />
+                        <button className="p-3 text-muted-foreground hover:text-foreground hover:bg-white/10 rounded-xl transition-colors backdrop-blur-md">
+                            <SlidersHorizontal size={22} />
                         </button>
                     </div>
                 </div>
