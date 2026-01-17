@@ -10,10 +10,13 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: 'swish_uploads', // One folder for all uploads for now, or make dynamic
-        allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-        transformation: [{ width: 1000, crop: 'limit' }]
+    params: async (req, file) => {
+        const isPdf = file.mimetype === 'application/pdf';
+        return {
+            folder: 'swish_uploads',
+            resource_type: 'auto',
+            transformation: isPdf ? [{ flags: 'attachment' }] : [{ width: 1000, crop: 'limit' }]
+        };
     }
 });
 

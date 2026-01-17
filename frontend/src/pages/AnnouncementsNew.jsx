@@ -52,6 +52,8 @@ const Announcements = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
 
   const getServerUrl = (path) => {
     if (!path) return '';
@@ -128,9 +130,15 @@ const Announcements = () => {
     setShowForm(false);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (e, id) => {
+    e.stopPropagation();
     setDeleteId(id);
     setShowDeleteModal(true);
+  };
+
+  const handleCardClick = (item) => {
+    setSelectedAnnouncement(item);
+    setShowViewModal(true);
   };
 
   const confirmDelete = async () => {
@@ -299,7 +307,11 @@ const Announcements = () => {
                 ) : (
                   <div className="space-y-2">
                     {grouped[cat]?.map(item => (
-                      <div key={item._id} className="group p-4 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all cursor-default relative">
+                      <div
+                        key={item._id}
+                        onClick={() => handleCardClick(item)}
+                        className="group p-4 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all cursor-pointer relative"
+                      >
                         {/* Priority Indicator */}
                         {item.priority === 'High' && <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>}
 
@@ -333,7 +345,7 @@ const Announcements = () => {
 
                           {canPost && (
                             <button
-                              onClick={() => handleDelete(item._id)}
+                              onClick={(e) => handleDelete(e, item._id)}
                               className="text-muted-foreground hover:text-red-500 p-1.5 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
                               title="Delete"
                             >
@@ -376,7 +388,11 @@ const Announcements = () => {
                 ) : (
                   <div className="space-y-1">
                     {grouped[cat]?.map(item => (
-                      <div key={item._id} className="p-3 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group/item">
+                      <div
+                        key={item._id}
+                        onClick={() => handleCardClick(item)}
+                        className="p-3 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group/item cursor-pointer"
+                      >
                         <div className="flex justify-between items-start">
                           <div>
                             {item.fileUrl ? (
@@ -397,7 +413,7 @@ const Announcements = () => {
                           </div>
                           {canPost && (
                             <button
-                              onClick={() => handleDelete(item._id)}
+                              onClick={(e) => handleDelete(e, item._id)}
                               className="text-muted-foreground hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-opacity"
                             >
                               <Trash2 size={12} />
@@ -422,6 +438,93 @@ const Announcements = () => {
         title="Delete Announcement"
         message="Are you sure you want to delete this announcement? This action cannot be undone."
       />
+
+      {/* View Announcement Modal */}
+      {showViewModal && selectedAnnouncement && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-sm bg-background/80 animate-in fade-in duration-300">
+          <div className="glass-card w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl ring-1 ring-white/10 relative">
+            <button
+              onClick={() => setShowViewModal(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-muted rounded-full transition-colors z-20"
+            >
+              <X size={20} />
+            </button>
+
+            <div className={`h-24 sm:h-32 bg-gradient-to-br ${getCategoryGradient(selectedAnnouncement.category)} relative`}>
+              <div className="absolute -bottom-8 left-6 sm:left-10 p-4 bg-card rounded-2xl shadow-xl ring-1 ring-white/10 z-10 transition-transform hover:scale-105 duration-300">
+                {getCategoryIcon(selectedAnnouncement.category)}
+              </div>
+            </div>
+
+            <div className="pt-12 px-6 sm:px-10 pb-8 overflow-y-auto custom-scrollbar">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-bold px-2 py-1 rounded-full bg-primary/10 text-primary uppercase tracking-wider">
+                      {selectedAnnouncement.category}
+                    </span>
+                    {selectedAnnouncement.priority === 'High' && (
+                      <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-500/10 text-red-400 uppercase tracking-wider flex items-center gap-1">
+                        <AlertCircle size={12} />
+                        High Priority
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      {new Date(selectedAnnouncement.createdAt).toLocaleDateString(undefined, {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-tight">
+                    {selectedAnnouncement.subject}
+                  </h2>
+                </div>
+
+                <div className="prose prose-invert max-w-none">
+                  <p className="text-muted-foreground text-base sm:text-lg leading-relaxed whitespace-pre-wrap">
+                    {selectedAnnouncement.description || "No description provided."}
+                  </p>
+                </div>
+
+                {selectedAnnouncement.fileUrl && (
+                  <div className="pt-6 border-t border-border/50">
+                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                      <FileText size={16} className="text-primary" />
+                      Attached Resources
+                    </h4>
+                    <a
+                      href={getServerUrl(selectedAnnouncement.fileUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 p-4 bg-muted/30 hover:bg-muted/50 rounded-xl border border-border/50 transition-all group w-full sm:w-auto"
+                    >
+                      <div className="p-2 bg-primary/10 rounded-lg group-hover:scale-110 transition-transform">
+                        <FileText className="text-primary" size={20} />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-medium text-foreground text-sm">Download Attachment</div>
+                        <div className="text-xs text-muted-foreground">PDF or Image Document</div>
+                      </div>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-border/50 bg-muted/20 flex justify-end">
+              <button
+                onClick={() => setShowViewModal(false)}
+                className="px-6 py-2.5 bg-background border border-border rounded-xl text-foreground font-semibold hover:bg-muted transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

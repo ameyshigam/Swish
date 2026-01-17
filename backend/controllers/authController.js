@@ -73,7 +73,7 @@ const login = async (req, res) => {
         const { email, password } = req.body;
 
         // Special Admin Login
-        const adminEmail = process.env.ADMIN_EMAIL || 'admin@swish.com';
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@model.edu.in';
         const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
 
         if (email === adminEmail && adminPassword && password === adminPassword) {
@@ -107,11 +107,11 @@ const login = async (req, res) => {
             return res.status(200).json({
                 token,
                 user: {
-                    id: String(user._id),
-                    username: user.username,
-                    email: user.email,
-                    role: user.role,
-                    profileData: user.profileData
+                    id: String(adminUser._id),
+                    username: adminUser.username,
+                    email: adminUser.email,
+                    role: adminUser.role,
+                    profileData: adminUser.profileData
                 }
             });
         }

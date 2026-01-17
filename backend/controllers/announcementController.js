@@ -11,7 +11,7 @@ const createAnnouncement = async (req, res) => {
 
         // Role-based validation
         if (userRole === 'Faculty') {
-            if (category !== 'Exam Notification' && category !== 'Latest Announcement') {
+            if (category !== 'Exam Notifications' && category !== 'Latest announcements') {
                 return res.status(403).json({ message: 'Faculty can only add Exam Notifications or Latest Announcements' });
             }
         }
@@ -27,6 +27,7 @@ const createAnnouncement = async (req, res) => {
         let filePath = null;
 
         if (req.file) {
+            console.log('Upload metadata:', req.file);
             const fileUrl = req.file.path;
             if (req.file.mimetype === 'application/pdf') {
                 filePath = fileUrl;
@@ -43,7 +44,7 @@ const createAnnouncement = async (req, res) => {
             targetSection,
             photo: photoPath,
             fileUrl: filePath,
-            createdBy: req.user ? req.user._id : null
+            createdBy: req.user ? req.user.id : null
         });
 
         // Notify Students
